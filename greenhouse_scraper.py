@@ -104,7 +104,27 @@ COMPANIES = {
     '23andme': '23andme',
     'braze': 'braze',
     'algolia': 'algolia',
-    'airbyte': 'airbyte'
+    'airbyte': 'airbyte',
+    'notion': 'notion',
+    'figma': 'figma',
+    'retool': 'retool',
+    'faire': 'faire',
+    'benchling': 'benchling',
+    'vercel': 'vercel',
+    'snyk': 'snyk',
+    'hashicorp': 'hashicorp',
+    'postman': 'postman',
+    'gitlab': 'gitlab',
+    'carta': 'carta',
+    'gusto': 'gusto',
+    'intercom': 'intercom',
+    'netlify': 'netlify',
+    'sentry': 'sentry',
+    'webflow': 'webflow',
+    'discord': 'discord',
+    'fivetran': 'fivetran',
+    'clickhouse': 'clickhouse',
+    'cockroach': 'cockroachlabs'
 }
 
 def main():
