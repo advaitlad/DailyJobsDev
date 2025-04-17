@@ -1,12 +1,4 @@
 // Firebase Configuration
-// To set up Firebase:
-// 1. Go to https://console.firebase.google.com/
-// 2. Create a new project or select existing one
-// 3. Click on the web icon (</>) to add a web app
-// 4. Copy the configuration object and replace the values below
-// 5. Enable Firestore Database in the Firebase Console
-// 6. Set up security rules for Firestore
-
 const firebaseConfig = {
     apiKey: "AIzaSyCs3SBzlY9Ak2NQUemLenB4ZNDdvQjBKic",
     authDomain: "dailyjobs-7b52e.firebaseapp.com",
