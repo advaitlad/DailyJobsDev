@@ -130,44 +130,141 @@ async function signOut() {
 async function deleteAccount() {
     try {
         const user = auth.currentUser;
-        if (!user) throw new Error('No user is currently signed in');
-
-        // Prompt for credentials
-        const email = user.email;
-        const password = prompt('Please enter your password to confirm account deletion:');
-        
-        if (!password) {
-            showMessage('Account deletion cancelled.', false);
+        if (!user) {
+            showMessage('No user is currently signed in', true);
             return;
         }
 
-        try {
-            // Create credential and re-authenticate
-            const credential = firebase.auth.EmailAuthProvider.credential(email, password);
-            await user.reauthenticateWithCredential(credential);
-
-            // Delete user data from Firestore
-            await db.collection('users').doc(user.uid).delete();
-            
-            // Delete user account
-            await user.delete();
-            showMessage('Account successfully deleted', false);
-        } catch (reAuthError) {
-            console.error('Re-authentication error:', reAuthError);
-            if (reAuthError.code === 'auth/wrong-password') {
-                showMessage('Incorrect password. Please try again.', true);
-            } else {
-                showMessage('Failed to re-authenticate. Please try signing out and back in.', true);
-            }
+        // First confirmation
+        if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
             return;
         }
+
+        // Create a modal for password input
+        const modalHtml = `
+            <div id="reauth-modal" class="modal">
+                <div class="modal-content">
+                    <h3>Confirm Account Deletion</h3>
+                    <p>Please enter your password to confirm account deletion:</p>
+                    <input type="password" id="reauth-password" class="form-input" />
+                    <div class="modal-buttons">
+                        <button id="confirm-delete" class="btn btn-danger">Delete Account</button>
+                        <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add modal to body
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+
+        // Add modal styles if not already present
+        if (!document.getElementById('modal-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'modal-styles';
+            styles.textContent = `
+                .modal {
+                    display: block;
+                    position: fixed;
+                    z-index: 1000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0,0,0,0.5);
+                }
+                .modal-content {
+                    background-color: white;
+                    margin: 15% auto;
+                    padding: 20px;
+                    border-radius: 8px;
+                    max-width: 400px;
+                    position: relative;
+                }
+                .modal-content h3 {
+                    margin-bottom: 1rem;
+                    color: #202124;
+                }
+                .modal-content p {
+                    margin-bottom: 1rem;
+                    color: #5f6368;
+                }
+                .form-input {
+                    width: 100%;
+                    padding: 8px;
+                    margin-bottom: 1rem;
+                    border: 1px solid #dadce0;
+                    border-radius: 4px;
+                }
+                .modal-buttons {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+
+        // Return a promise that resolves when the user confirms or cancels
+        return new Promise((resolve, reject) => {
+            const modal = document.getElementById('reauth-modal');
+            const confirmBtn = document.getElementById('confirm-delete');
+            const cancelBtn = document.getElementById('cancel-delete');
+            const passwordInput = document.getElementById('reauth-password');
+
+            const cleanup = () => {
+                modal.remove();
+            };
+
+            confirmBtn.addEventListener('click', async () => {
+                const password = passwordInput.value;
+                if (!password) {
+                    showMessage('Please enter your password', true);
+                    return;
+                }
+
+                try {
+                    // Create credential and re-authenticate
+                    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+                    await user.reauthenticateWithCredential(credential);
+
+                    // Delete user data from Firestore
+                    await db.collection('users').doc(user.uid).delete();
+                    
+                    // Delete user account
+                    await user.delete();
+                    cleanup();
+                    showMessage('Account successfully deleted', false);
+                    resolve();
+                } catch (error) {
+                    console.error('Delete account error:', error);
+                    if (error.code === 'auth/wrong-password') {
+                        showMessage('Incorrect password. Please try again.', true);
+                    } else {
+                        showMessage('Failed to delete account. Please try again.', true);
+                        cleanup();
+                        reject(error);
+                    }
+                }
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                cleanup();
+                resolve();
+            });
+
+            // Allow pressing Enter to confirm
+            passwordInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    confirmBtn.click();
+                }
+            });
+        });
     } catch (error) {
         console.error('Delete account error:', error);
-        if (error.code === 'auth/requires-recent-login') {
-            showMessage('For security reasons, please sign out and sign in again before deleting your account.', true);
-        } else {
-            showMessage('Failed to delete account. Please try again.', true);
-        }
+        showMessage('Failed to delete account. Please try again.', true);
     }
 }
 
