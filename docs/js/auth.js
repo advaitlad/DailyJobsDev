@@ -135,11 +135,6 @@ async function deleteAccount() {
             return;
         }
 
-        // Show initial confirmation dialog
-        if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-            return;
-        }
-
         // Create a modal for password input
         const modalHtml = `
             <div id="reauth-modal" class="modal">
@@ -255,7 +250,7 @@ async function deleteAccount() {
 
             cancelBtn.onclick = () => {
                 cleanup();
-                resolve();
+                resolve(false);
             };
 
             confirmBtn.onclick = async () => {
@@ -281,7 +276,7 @@ async function deleteAccount() {
                     await user.delete();
                     cleanup();
                     showMessage('Account successfully deleted', false);
-                    resolve();
+                    resolve(true);
                 } catch (error) {
                     console.error('Delete account error:', error);
                     if (error.code === 'auth/wrong-password') {
