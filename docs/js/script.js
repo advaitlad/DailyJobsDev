@@ -240,32 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Forgot Password Handler
-    const forgotPassword = document.getElementById('forgotPassword');
-    if (forgotPassword) {
-        forgotPassword.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            const emailInput = document.getElementById('loginEmail');
-            if (!emailInput) {
-                showMessage('Email input not found. Please refresh the page.', true);
-                return;
-            }
-
-            const email = emailInput.value.trim();
-            if (!email) {
-                showMessage('Please enter your email address first.', true);
-                return;
-            }
-
-            try {
-                await resetPassword(email);
-            } catch (error) {
-                showMessage(error.message, true);
-            }
-        });
-    }
-
     // Save Preferences Handler
     const savePreferencesBtn = document.getElementById('save-preferences');
     if (savePreferencesBtn) {

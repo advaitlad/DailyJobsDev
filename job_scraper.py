@@ -31,9 +31,12 @@ def scrape_jobs():
     user_preferences = {}
     for user in users:
         user_data = user.to_dict()
-        # Only include verified users with preferences and email
-        if user_data.get('emailVerified', False) and 'preferences' in user_data and user_data.get('email'):
-            user_preferences[user_data['email']] = user_data['preferences']
+        # Only include verified users with non-empty preferences and email
+        preferences = user_data.get('preferences', [])
+        if (user_data.get('emailVerified', False) and 
+            preferences and  # This checks if preferences is non-empty
+            user_data.get('email')):
+            user_preferences[user_data['email']] = preferences
     
     # Scrape Greenhouse jobs
     print("\nScraping Greenhouse jobs...")
@@ -55,14 +58,17 @@ def scrape_jobs():
     
     # Send personalized emails to each verified user based on their preferences
     verified_users = len(user_preferences)
-    print(f"\nFound {verified_users} verified users with preferences")
+    print(f"\nFound {verified_users} verified users with non-empty preferences")
     
     for email, preferences in user_preferences.items():
         # Filter jobs based on user preferences
         user_jobs = [job for job in all_new_jobs if job['company'].lower() in preferences]
+        # Always send email notification, even if no new jobs
+        send_email_notification(user_jobs, email)
         if user_jobs:
-            send_email_notification(user_jobs, email)
             print(f"Sent notification to {email} with {len(user_jobs)} matching jobs")
+        else:
+            print(f"Sent 'no new jobs' notification to {email}")
     
     if all_new_jobs:
         print(f"\nFound {len(all_new_jobs)} new jobs in total!")
