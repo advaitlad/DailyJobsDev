@@ -13,8 +13,20 @@ const companies = [
 ];
 
 // Populate companies grid
-function populateCompanies() {
-    const companiesGrid = document.getElementById('companies-grid');
+function populateCompanies(selectedCompanies = []) {
+    const selectedContainer = document.getElementById('selected-companies');
+    const availableContainer = document.getElementById('available-companies');
+    const noSelectedMessage = document.getElementById('no-selected');
+    
+    // Clear existing content
+    selectedContainer.innerHTML = '';
+    availableContainer.innerHTML = '';
+    
+    // Add no selection message (will be hidden if there are selections)
+    selectedContainer.appendChild(noSelectedMessage);
+    
+    let selectedCount = 0;
+    let availableCount = 0;
     
     companies.forEach(company => {
         const label = document.createElement('label');
@@ -30,8 +42,65 @@ function populateCompanies() {
         
         label.appendChild(checkbox);
         label.appendChild(span);
-        companiesGrid.appendChild(label);
+        
+        // Add to appropriate container
+        if (selectedCompanies.includes(company)) {
+            checkbox.checked = true;
+            selectedContainer.appendChild(label);
+            selectedCount++;
+        } else {
+            availableContainer.appendChild(label);
+            availableCount++;
+        }
+        
+        // Add click handler to move between containers
+        checkbox.addEventListener('change', () => {
+            const parentContainer = label.parentElement;
+            if (checkbox.checked) {
+                selectedContainer.appendChild(label);
+                selectedCount++;
+                availableCount--;
+            } else {
+                availableContainer.appendChild(label);
+                selectedCount--;
+                availableCount++;
+            }
+            
+            // Update counts
+            document.getElementById('selected-count').textContent = selectedCount;
+            document.getElementById('available-count').textContent = availableCount;
+            
+            // Toggle no selection message
+            noSelectedMessage.style.display = selectedCount === 0 ? 'block' : 'none';
+        });
     });
+    
+    // Set initial counts
+    document.getElementById('selected-count').textContent = selectedCount;
+    document.getElementById('available-count').textContent = availableCount;
+    
+    // Show/hide no selection message
+    noSelectedMessage.style.display = selectedCount === 0 ? 'block' : 'none';
+}
+
+// Load user preferences
+async function loadUserPreferences(userId) {
+    try {
+        const doc = await db.collection('users').doc(userId).get();
+        if (doc.exists) {
+            const data = doc.data();
+            if (data.preferences) {
+                populateCompanies(data.preferences);
+            } else {
+                populateCompanies([]);
+            }
+        } else {
+            populateCompanies([]);
+        }
+    } catch (error) {
+        console.error('Load preferences error:', error);
+        showMessage('Failed to load preferences. Please refresh the page.', true);
+    }
 }
 
 // Handle form submission
@@ -204,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savePreferencesBtn) {
         savePreferencesBtn.addEventListener('click', async () => {
             try {
-                const selectedCompanies = Array.from(document.querySelectorAll('.company-checkbox:checked'))
+                const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox'))
                     .map(checkbox => checkbox.value);
                 await saveUserPreferences(selectedCompanies);
             } catch (error) {

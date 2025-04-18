@@ -34,7 +34,6 @@
                     <input type="password" id="loginPassword" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Login</button>
-                <a href="#" id="forgotPassword" class="forgot-password">Forgot Password?</a>
             </form>
 
             <!-- Signup Form -->
@@ -61,8 +60,10 @@
 
         <div class="preferences-container hidden" id="preferences-container">
             <div class="user-info">
-                <h2 id="userDisplayName">User</h2>
-                <p id="userEmail">user@example.com</p>
+                <div class="user-details">
+                    <h2 id="userDisplayName">User</h2>
+                    <p id="userEmail">user@example.com</p>
+                </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary" id="sign-out">Sign Out</button>
                     <button class="btn btn-danger" id="delete-account">Delete Account</button>
@@ -70,10 +71,23 @@
             </div>
 
             <div class="preferences-box">
-                <h3>Select Companies to Track</h3>
-                <div class="companies-grid" id="companies-grid">
-                    <!-- Company checkboxes will be added dynamically -->
+                <h3>Company Preferences</h3>
+                <div id="preferences-message" class="message"></div>
+
+                <div class="companies-section">
+                    <h4>Selected Companies <span class="count" id="selected-count">0</span></h4>
+                    <div class="companies-grid" id="selected-companies">
+                        <div class="no-companies" id="no-selected">You haven't selected any companies yet</div>
+                    </div>
                 </div>
+
+                <div class="companies-section">
+                    <h4>Available Companies <span class="count" id="available-count">0</span></h4>
+                    <div class="companies-grid" id="available-companies">
+                        <!-- Companies will be added dynamically -->
+                    </div>
+                </div>
+
                 <button class="btn btn-primary" id="save-preferences">Save Preferences</button>
             </div>
         </div>

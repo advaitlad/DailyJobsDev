@@ -70,21 +70,6 @@ async function signOut() {
     }
 }
 
-// Password Reset
-async function resetPassword(email) {
-    try {
-        await auth.sendPasswordResetEmail(email);
-        showMessage('Password reset email sent! Check your inbox.');
-    } catch (error) {
-        console.error('Password reset error:', error);
-        let errorMessage = 'Failed to send reset email. Please try again.';
-        if (error.code === 'auth/user-not-found') {
-            errorMessage = 'No account found with this email.';
-        }
-        showMessage(errorMessage, true);
-    }
-}
-
 // Delete Account
 async function deleteAccount() {
     try {
@@ -114,10 +99,10 @@ async function saveUserPreferences(preferences) {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
-        showMessage('Preferences saved successfully!');
+        showMessage('Preferences saved successfully!', false, true);
     } catch (error) {
         console.error('Save preferences error:', error);
-        showMessage('Failed to save preferences. Please try again.', true);
+        showMessage('Failed to save preferences. Please try again.', true, true);
     }
 }
 
@@ -169,8 +154,13 @@ async function ensureUserDocument(user, fullName = null) {
 }
 
 // Helper function to show messages
-function showMessage(message, isError = false) {
-    const messageDiv = document.getElementById('message');
+function showMessage(message, isError = false, isPreferences = false) {
+    const messageDiv = isPreferences ? 
+        document.getElementById('preferences-message') : 
+        document.getElementById('message');
+    
+    if (!messageDiv) return;
+    
     messageDiv.textContent = message;
     messageDiv.className = isError ? 'message error' : 'message success';
     messageDiv.style.display = 'block';
