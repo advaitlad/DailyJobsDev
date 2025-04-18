@@ -360,6 +360,8 @@ const VERIFICATION_EMAIL_COOLDOWN = 60000; // 60 seconds cooldown
 
 // Resend verification email
 async function resendVerificationEmail() {
+    const resendButton = document.querySelector('button[onclick="resendVerificationEmail()"]');
+    
     try {
         const user = auth.currentUser;
         if (!user) {
@@ -381,6 +383,12 @@ async function resendVerificationEmail() {
             return;
         }
 
+        // Disable button and show sending state
+        if (resendButton) {
+            resendButton.disabled = true;
+            resendButton.textContent = 'Sending...';
+        }
+
         // Construct the full URL including protocol
         const continueUrl = 'https://advaitlad.github.io/DailyJobs/';
         const actionCodeSettings = {
@@ -390,7 +398,65 @@ async function resendVerificationEmail() {
         
         await user.sendEmailVerification(actionCodeSettings);
         lastVerificationEmailSent = now;
-        showMessage('✓ Verification email sent! Please check your inbox and spam folder. The verification link will expire in 1 hour.', false);
+
+        // Update button state and show success message
+        if (resendButton) {
+            resendButton.textContent = 'Email Sent ✓';
+            setTimeout(() => {
+                resendButton.disabled = false;
+                resendButton.textContent = 'Resend Verification Email';
+            }, VERIFICATION_EMAIL_COOLDOWN);
+        }
+
+        // Show success message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'verification-message success';
+        messageDiv.innerHTML = `
+            <p>✓ Verification email sent!</p>
+            <p class="verification-details">
+                • Please check your inbox and spam folder<br>
+                • The verification link will expire in 1 hour<br>
+                • You can request another email in 60 seconds
+            </p>
+        `;
+
+        // Add styles if not already present
+        if (!document.getElementById('verification-message-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'verification-message-styles';
+            styles.textContent = `
+                .verification-message {
+                    margin: 1rem 0;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    background-color: #e6f4ea;
+                    color: #1e4620;
+                }
+                .verification-message.success {
+                    border-left: 4px solid #34a853;
+                }
+                .verification-message p {
+                    margin: 0;
+                    line-height: 1.5;
+                }
+                .verification-details {
+                    font-size: 0.9rem;
+                    margin-top: 0.5rem !important;
+                    color: #1e4620;
+                }
+            `;
+            document.head.appendChild(styles);
+        }
+
+        // Insert message after the resend button
+        if (resendButton) {
+            const existingMessage = document.querySelector('.verification-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            resendButton.parentNode.insertBefore(messageDiv, resendButton.nextSibling);
+        }
+
     } catch (error) {
         console.error('Error sending verification email:', error);
         let errorMessage = 'Failed to send verification email. ';
@@ -402,6 +468,12 @@ async function resendVerificationEmail() {
             errorMessage += 'Please try again later.';
         }
         showMessage(errorMessage, true);
+
+        // Reset button state if there was an error
+        if (resendButton) {
+            resendButton.disabled = false;
+            resendButton.textContent = 'Resend Verification Email';
+        }
     }
 }
 
