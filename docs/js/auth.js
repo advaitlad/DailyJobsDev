@@ -486,19 +486,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Update the Delete Account Handler in your initialization code
 document.addEventListener('DOMContentLoaded', () => {
-    // ... existing event listeners ...
-
     // Delete Account Handler
     const deleteAccountBtn = document.getElementById('delete-account');
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', async () => {
-            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                try {
-                    await deleteAccount();
-                } catch (error) {
-                    // Error is already handled in deleteAccount function
-                    console.error('Delete account error:', error);
-                }
+            try {
+                await deleteAccount();
+            } catch (error) {
+                // Error is already handled in deleteAccount function
+                console.error('Delete account error:', error);
             }
         });
     }
