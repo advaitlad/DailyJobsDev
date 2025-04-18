@@ -3,6 +3,8 @@ const auth = firebase.auth();
 
 // Google Auth Provider
 const googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
 
 // Auth state observer
 auth.onAuthStateChanged((user) => {
@@ -31,7 +33,14 @@ async function loginWithEmailPassword(email, password) {
         await auth.signInWithEmailAndPassword(email, password);
         showMessage('Successfully logged in!');
     } catch (error) {
-        showMessage(error.message, true);
+        console.error('Login error:', error);
+        let errorMessage = 'Failed to log in. Please try again.';
+        if (error.code === 'auth/user-not-found') {
+            errorMessage = 'No account found with this email. Please sign up first.';
+        } else if (error.code === 'auth/wrong-password') {
+            errorMessage = 'Incorrect password. Please try again.';
+        }
+        showMessage(errorMessage, true);
     }
 }
 
@@ -60,6 +69,18 @@ async function signupWithEmailPassword(fullName, email, password) {
 // Google Sign In
 async function signInWithGoogle() {
     try {
+        // Check if we're running in a supported environment
+        if (!window.location.hostname.includes('github.io') && 
+            !window.location.hostname.includes('localhost') && 
+            !window.location.hostname.includes('127.0.0.1')) {
+            throw new Error('Google Sign-In requires running on a web server. Please access the site through GitHub Pages.');
+        }
+
+        // Configure Google Sign-In
+        googleProvider.setCustomParameters({
+            prompt: 'select_account'
+        });
+
         const result = await auth.signInWithPopup(googleProvider);
         const user = result.user;
         
@@ -70,6 +91,7 @@ async function signInWithGoogle() {
             await db.collection('users').doc(user.uid).set({
                 name: user.displayName,
                 email: user.email,
+                photoURL: user.photoURL,
                 preferences: [],
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
@@ -77,7 +99,18 @@ async function signInWithGoogle() {
         
         showMessage('Successfully signed in with Google!');
     } catch (error) {
-        showMessage(error.message, true);
+        console.error('Google sign in error:', error);
+        let errorMessage = 'Failed to sign in with Google. Please try again.';
+        
+        if (error.code === 'auth/popup-blocked') {
+            errorMessage = 'Pop-up was blocked by your browser. Please allow pop-ups for this site.';
+        } else if (error.code === 'auth/popup-closed-by-user') {
+            errorMessage = 'Sign-in was cancelled. Please try again.';
+        } else if (error.code === 'auth/operation-not-supported-in-this-environment') {
+            errorMessage = 'Please access the site through GitHub Pages or a web server.';
+        }
+        
+        showMessage(errorMessage, true);
     }
 }
 

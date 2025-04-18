@@ -102,17 +102,40 @@ document.addEventListener('DOMContentLoaded', () => {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            // Get form elements
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('signupEmail');
+            const passwordInput = document.getElementById('signupPassword');
+            const confirmPasswordInput = document.getElementById('signupConfirmPassword');
+
+            // Validate form elements exist
+            if (!nameInput || !emailInput || !passwordInput || !confirmPasswordInput) {
+                showMessage('Form elements not found. Please refresh the page.', true);
+                return;
+            }
+
+            // Get form values
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validate inputs
+            if (!name || !email || !password || !confirmPassword) {
+                showMessage('Please fill in all fields', true);
+                return;
+            }
 
             if (password !== confirmPassword) {
                 showMessage('Passwords do not match', true);
                 return;
             }
 
-            await signupWithEmailPassword(name, email, password);
+            try {
+                await signupWithEmailPassword(name, email, password);
+            } catch (error) {
+                showMessage(error.message, true);
+            }
         });
     }
 
@@ -122,10 +145,31 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            // Get form elements
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
 
-            await loginWithEmailPassword(email, password);
+            // Validate form elements exist
+            if (!emailInput || !passwordInput) {
+                showMessage('Form elements not found. Please refresh the page.', true);
+                return;
+            }
+
+            // Get form values
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Validate inputs
+            if (!email || !password) {
+                showMessage('Please fill in all fields', true);
+                return;
+            }
+
+            try {
+                await loginWithEmailPassword(email, password);
+            } catch (error) {
+                showMessage(error.message, true);
+            }
         });
     }
 
@@ -135,44 +179,74 @@ document.addEventListener('DOMContentLoaded', () => {
         forgotPassword.addEventListener('click', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('loginEmail').value;
+            const emailInput = document.getElementById('loginEmail');
+            if (!emailInput) {
+                showMessage('Email input not found. Please refresh the page.', true);
+                return;
+            }
+
+            const email = emailInput.value.trim();
             if (!email) {
                 showMessage('Please enter your email address first.', true);
                 return;
             }
 
-            await resetPassword(email);
+            try {
+                await resetPassword(email);
+            } catch (error) {
+                showMessage(error.message, true);
+            }
         });
     }
 
     // Save Preferences Handler
     const savePreferencesBtn = document.getElementById('save-preferences');
     if (savePreferencesBtn) {
-        savePreferencesBtn.addEventListener('click', () => {
-            const selectedCompanies = Array.from(document.querySelectorAll('.company-checkbox:checked'))
-                .map(checkbox => checkbox.value);
-            saveUserPreferences(selectedCompanies);
+        savePreferencesBtn.addEventListener('click', async () => {
+            try {
+                const selectedCompanies = Array.from(document.querySelectorAll('.company-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                await saveUserPreferences(selectedCompanies);
+            } catch (error) {
+                showMessage(error.message, true);
+            }
         });
     }
 
     // Sign Out Handler
     const signOutBtn = document.getElementById('sign-out');
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', signOut);
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await signOut();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        });
     }
 
     // Delete Account Handler
     const deleteAccountBtn = document.getElementById('delete-account');
     if (deleteAccountBtn) {
-        deleteAccountBtn.addEventListener('click', () => {
+        deleteAccountBtn.addEventListener('click', async () => {
             if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                deleteAccount();
+                try {
+                    await deleteAccount();
+                } catch (error) {
+                    showMessage(error.message, true);
+                }
             }
         });
     }
 
     // Google Sign-In Buttons
     document.querySelectorAll('.google-btn').forEach(button => {
-        button.addEventListener('click', signInWithGoogle);
+        button.addEventListener('click', async () => {
+            try {
+                await signInWithGoogle();
+            } catch (error) {
+                showMessage(error.message, true);
+            }
+        });
     });
 }); 
