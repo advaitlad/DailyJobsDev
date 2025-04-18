@@ -4,49 +4,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Updates Signup</title>
+    <title>Job Updates - Sign In</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>
     <div class="container">
-        <div class="form-container">
-            <h1>Job Updates Signup</h1>
-            <p class="subtitle">Get notified about new Product Manager positions from your favorite companies</p>
+        <div class="auth-container" id="auth-container">
+            <div class="auth-header">
+                <h1>Job Updates</h1>
+                <p>Stay updated with the latest job postings</p>
+            </div>
 
-            <form id="signupForm">
+            <div class="auth-toggle" id="authToggle">
+                <button class="toggle-btn active" data-form="login">Login</button>
+                <button class="toggle-btn" data-form="signup">Sign Up</button>
+            </div>
+
+            <div id="message" class="message"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="#" id="forgotPassword" class="forgot-password">Forgot Password?</a>
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <button type="button" class="btn google-btn">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form hidden">
                 <div class="form-group">
                     <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" required>
+                    <input type="text" id="name" required>
                 </div>
-
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required>
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" required>
                 </div>
-
                 <div class="form-group">
-                    <label>Select Companies</label>
-                    <div class="companies-grid" id="companiesGrid">
-                        <!-- Companies will be populated by JavaScript -->
-                    </div>
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" required>
                 </div>
-
-                <button type="submit" class="submit-btn">Sign Up</button>
+                <div class="form-group">
+                    <label for="signupConfirmPassword">Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <button type="button" class="btn google-btn">
+                    <i class="fab fa-google"></i> Sign up with Google
+                </button>
             </form>
+        </div>
+
+        <div class="preferences-container hidden" id="preferences-container">
+            <div class="user-info">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/default-user.png" alt="Profile"
+                    class="profile-photo" id="profilePhoto">
+                <h2 id="userDisplayName">User</h2>
+                <p id="userEmail">user@example.com</p>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="sign-out">Sign Out</button>
+                    <button class="btn btn-danger" id="delete-account">Delete Account</button>
+                </div>
+            </div>
+
+            <div class="preferences-box">
+                <h3>Select Companies to Track</h3>
+                <div class="companies-grid" id="companies-grid">
+                    <!-- Company checkboxes will be added dynamically -->
+                </div>
+                <button class="btn btn-primary" id="save-preferences">Save Preferences</button>
+            </div>
         </div>
     </div>
 
-    <div id="successMessage" class="success-message hidden">
-        <h2>Success!</h2>
-        <p>You've been successfully signed up for job updates.</p>
-        <p>You'll start receiving emails when new positions are posted at your selected companies.</p>
-    </div>
-
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <!-- App Scripts -->
     <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/script.js"></script>
 </body>
 
