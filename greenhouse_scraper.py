@@ -2,13 +2,25 @@ import requests
 from datetime import datetime
 
 def is_product_role(title):
-    """Check if a job title is a product management or program management role"""
-    keywords = [
+    """Check if a job title is a product management role"""
+    product_keywords = [
         'product manager',
         'product owner',
         'technical product manager',
-        'product management',
+        'product management'
+    ]
+    
+    if not title:
+        return False
+        
+    title_lower = title.lower()
+    return any(keyword in title_lower for keyword in product_keywords)
+
+def is_program_role(title):
+    """Check if a job title is a program management role"""
+    program_keywords = [
         'program manager',
+        'programme manager',
         'technical program manager',
         'program management'
     ]
@@ -17,7 +29,15 @@ def is_product_role(title):
         return False
         
     title_lower = title.lower()
-    return any(keyword in title_lower for keyword in keywords)
+    return any(keyword in title_lower for keyword in program_keywords)
+
+def get_role_type(title):
+    """Determine if a role is a product or program management position"""
+    if is_product_role(title):
+        return 'product'
+    elif is_program_role(title):
+        return 'program'
+    return None
 
 def scrape_greenhouse_jobs(company_name, board_token):
     """Generic function to scrape jobs from any Greenhouse board
@@ -38,8 +58,9 @@ def scrape_greenhouse_jobs(company_name, board_token):
         for job in jobs_data:
             title = job.get('title', 'N/A')
             
-            # Only process product manager roles
-            if not is_product_role(title):
+            # Determine role type
+            role_type = get_role_type(title)
+            if not role_type:
                 continue
                 
             try:
@@ -57,7 +78,8 @@ def scrape_greenhouse_jobs(company_name, board_token):
                 'job_id': f"{company_name}_{job.get('id', 'N/A')}",
                 'updated_at': job.get('updated_at', 'N/A'),
                 'url': job.get('absolute_url', 'N/A'),
-                'date_scraped': datetime.now().isoformat()
+                'date_scraped': datetime.now().isoformat(),
+                'role_type': role_type
             }
             processed_jobs.append(job_info)
 

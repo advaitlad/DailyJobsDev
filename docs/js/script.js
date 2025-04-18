@@ -132,23 +132,73 @@ function populateCompanies(selectedCompanies = [], searchTerm = '') {
     }
 }
 
-// Load user preferences
-async function loadUserPreferences(userId) {
+// Save preferences to Firestore
+async function savePreferences() {
+    const user = auth.currentUser;
+    if (!user) {
+        showMessage('Please sign in to save preferences', true);
+        return;
+    }
+
     try {
-        const doc = await db.collection('users').doc(userId).get();
+        // Get selected companies
+        const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox'))
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+
+        // Get selected job types
+        const selectedJobTypes = Array.from(document.querySelectorAll('.job-type-checkbox'))
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+
+        // Save to Firestore
+        await db.collection('users').doc(user.uid).update({
+            preferences: selectedCompanies,
+            jobTypes: selectedJobTypes,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const saveBtn = document.getElementById('save-preferences');
+        saveBtn.classList.add('saved');
+        saveBtn.textContent = 'Preferences Saved!';
+        setTimeout(() => {
+            saveBtn.classList.remove('saved');
+            saveBtn.textContent = 'Save Preferences';
+        }, 2000);
+
+    } catch (error) {
+        console.error('Error saving preferences:', error);
+        showMessage('Error saving preferences. Please try again.', true);
+    }
+}
+
+// Load preferences from Firestore
+async function loadPreferences() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             const data = doc.data();
+            
+            // Load company preferences
             if (data.preferences) {
                 populateCompanies(data.preferences);
             } else {
                 populateCompanies([]);
             }
-        } else {
-            populateCompanies([]);
+
+            // Load job type preferences
+            if (data.jobTypes) {
+                document.querySelectorAll('.job-type-checkbox').forEach(checkbox => {
+                    checkbox.checked = data.jobTypes.includes(checkbox.value);
+                });
+            }
         }
     } catch (error) {
-        console.error('Load preferences error:', error);
-        showMessage('Failed to load preferences. Please refresh the page.', true);
+        console.error('Error loading preferences:', error);
+        showMessage('Error loading preferences. Please try again.', true);
     }
 }
 
@@ -338,48 +388,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Save Preferences Handler
+    // Save preferences button
     const savePreferencesBtn = document.getElementById('save-preferences');
     if (savePreferencesBtn) {
-        savePreferencesBtn.addEventListener('click', async () => {
-            try {
-                const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox'))
-                    .map(checkbox => checkbox.value);
-                
-                // Disable button and show saving state
-                savePreferencesBtn.disabled = true;
-                savePreferencesBtn.textContent = 'Saving...';
-                
-                await saveUserPreferences(selectedCompanies);
-                
-                // Show success state
-                savePreferencesBtn.classList.add('saved');
-                savePreferencesBtn.textContent = '✓ Preferences Saved';
-                
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                    savePreferencesBtn.disabled = false;
-                    savePreferencesBtn.classList.remove('saved');
-                    savePreferencesBtn.textContent = 'Save Preferences';
-                }, 2000);
-            } catch (error) {
-                // Reset button on error
-                savePreferencesBtn.disabled = false;
-                savePreferencesBtn.textContent = 'Save Preferences';
-                showMessage(error.message, true);
-            }
-        });
+        savePreferencesBtn.addEventListener('click', savePreferences);
     }
 
-    // Sign Out Handler
-    const signOutBtn = document.getElementById('sign-out');
-    if (signOutBtn) {
-        signOutBtn.addEventListener('click', async () => {
-            try {
-                await signOut();
-            } catch (error) {
-                showMessage(error.message, true);
+    // Initialize auth state observer
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            if (user.emailVerified) {
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('verification-container').classList.add('hidden');
+                document.getElementById('preferences-container').classList.remove('hidden');
+                
+                // Set user info
+                document.getElementById('userDisplayName').textContent = user.displayName || 'User';
+                document.getElementById('userEmail').textContent = user.email;
+                
+                // Load preferences
+                loadPreferences();
+            } else {
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('preferences-container').classList.add('hidden');
+                document.getElementById('verification-container').classList.remove('hidden');
             }
-        });
-    }
+        } else {
+            document.getElementById('auth-container').classList.remove('hidden');
+            document.getElementById('preferences-container').classList.add('hidden');
+            document.getElementById('verification-container').classList.add('hidden');
+        }
+    });
 }); 
