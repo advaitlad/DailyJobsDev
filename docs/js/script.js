@@ -202,10 +202,42 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Set a new timeout to update the list
             debounceTimeout = setTimeout(() => {
-                const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox:checked'))
+                const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox'))
                     .map(checkbox => checkbox.value);
                 populateCompanies(selectedCompanies, e.target.value.trim());
             }, 300); // Wait 300ms after user stops typing
+        });
+    }
+
+    // Add All button functionality
+    const addAllBtn = document.getElementById('add-all-btn');
+    if (addAllBtn) {
+        addAllBtn.addEventListener('click', () => {
+            // Get all visible checkboxes in available companies
+            const availableCheckboxes = document.querySelectorAll('#available-companies .company-checkbox');
+            
+            // Click each checkbox that isn't already checked
+            availableCheckboxes.forEach(checkbox => {
+                if (!checkbox.checked) {
+                    checkbox.click(); // This will trigger the existing change event
+                }
+            });
+        });
+    }
+
+    // Remove All button functionality
+    const removeAllBtn = document.getElementById('remove-all-btn');
+    if (removeAllBtn) {
+        removeAllBtn.addEventListener('click', () => {
+            // Get all checkboxes in selected companies
+            const selectedCheckboxes = document.querySelectorAll('#selected-companies .company-checkbox');
+            
+            // Click each checked checkbox to unselect it
+            selectedCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    checkbox.click(); // This will trigger the existing change event
+                }
+            });
         });
     }
 

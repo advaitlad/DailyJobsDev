@@ -90,7 +90,12 @@
                 <div id="preferences-message" class="message"></div>
 
                 <div class="companies-section">
-                    <h4>Selected Companies <span class="count" id="selected-count">0</span></h4>
+                    <div class="section-header">
+                        <h4>Selected Companies <span class="count" id="selected-count">0</span></h4>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" id="remove-all-btn">Remove All</button>
+                        </div>
+                    </div>
                     <div class="companies-grid" id="selected-companies">
                         <div class="no-companies" id="no-selected">You haven't selected any companies yet</div>
                     </div>
@@ -99,9 +104,12 @@
                 <div class="companies-section">
                     <div class="section-header">
                         <h4>Available Companies <span class="count" id="available-count">0</span></h4>
-                        <div class="search-container">
-                            <input type="text" id="company-search" class="search-input"
-                                placeholder="Search available companies...">
+                        <div class="search-actions">
+                            <div class="search-container">
+                                <input type="text" id="company-search" class="search-input"
+                                    placeholder="Search available companies...">
+                            </div>
+                            <button class="btn btn-secondary" id="add-all-btn">Add All</button>
                         </div>
                     </div>
                     <div class="companies-grid" id="available-companies">

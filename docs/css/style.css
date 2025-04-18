@@ -245,8 +245,38 @@ body {
     font-weight: 600;
 }
 
+.section-header {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.section-header h4 {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-actions,
+.search-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
 .search-container {
-    width: 100%;
+    flex: 1;
+}
+
+#add-all-btn,
+#remove-all-btn {
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+    height: 100%;
+    align-self: stretch;
 }
 
 .search-input {
@@ -274,14 +304,6 @@ body {
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
-}
-
-.section-header {
-    margin-bottom: 1rem;
-}
-
-.section-header h4 {
-    margin-bottom: 0.75rem;
 }
 
 .companies-section h4 {
@@ -418,6 +440,25 @@ body {
     .sticky-footer .btn {
         font-size: 0.95rem;
         padding: 0.75rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+    }
+
+    .section-actions {
+        width: 100%;
+    }
+
+    .search-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    #add-all-btn,
+    #remove-all-btn {
+        width: 100%;
     }
 }
 
