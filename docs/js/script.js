@@ -270,12 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteAccountBtn = document.getElementById('delete-account');
     if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', async () => {
-            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                try {
-                    await deleteAccount();
-                } catch (error) {
-                    showMessage(error.message, true);
-                }
+            try {
+                await deleteAccount();
+            } catch (error) {
+                showMessage('Failed to delete account: ' + error.message, true);
             }
         });
     }
