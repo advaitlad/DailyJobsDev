@@ -126,21 +126,48 @@ async function signOut() {
     }
 }
 
-// Delete Account
+// Delete Account with re-authentication
 async function deleteAccount() {
     try {
         const user = auth.currentUser;
         if (!user) throw new Error('No user is currently signed in');
 
-        // Delete user data from Firestore
-        await db.collection('users').doc(user.uid).delete();
+        // Prompt for credentials
+        const email = user.email;
+        const password = prompt('Please enter your password to confirm account deletion:');
         
-        // Delete user account
-        await user.delete();
-        showMessage('Account successfully deleted');
+        if (!password) {
+            showMessage('Account deletion cancelled.', false);
+            return;
+        }
+
+        try {
+            // Create credential and re-authenticate
+            const credential = firebase.auth.EmailAuthProvider.credential(email, password);
+            await user.reauthenticateWithCredential(credential);
+
+            // Delete user data from Firestore
+            await db.collection('users').doc(user.uid).delete();
+            
+            // Delete user account
+            await user.delete();
+            showMessage('Account successfully deleted', false);
+        } catch (reAuthError) {
+            console.error('Re-authentication error:', reAuthError);
+            if (reAuthError.code === 'auth/wrong-password') {
+                showMessage('Incorrect password. Please try again.', true);
+            } else {
+                showMessage('Failed to re-authenticate. Please try signing out and back in.', true);
+            }
+            return;
+        }
     } catch (error) {
         console.error('Delete account error:', error);
-        showMessage('Failed to delete account. Please try again.', true);
+        if (error.code === 'auth/requires-recent-login') {
+            showMessage('For security reasons, please sign out and sign in again before deleting your account.', true);
+        } else {
+            showMessage('Failed to delete account. Please try again.', true);
+        }
     }
 }
 
@@ -280,3 +307,23 @@ async function resendVerificationEmail() {
         showMessage(errorMessage, true);
     }
 }
+
+// Update the Delete Account Handler in your initialization code
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing event listeners ...
+
+    // Delete Account Handler
+    const deleteAccountBtn = document.getElementById('delete-account');
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                try {
+                    await deleteAccount();
+                } catch (error) {
+                    // Error is already handled in deleteAccount function
+                    console.error('Delete account error:', error);
+                }
+            }
+        });
+    }
+});
