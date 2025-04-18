@@ -183,10 +183,10 @@ def send_email_notification(jobs, recipient_email):
     msg['To'] = recipient_email
     
     if jobs:
-        msg['Subject'] = f"New Product Manager Openings Found ({len(jobs)} positions)"
+        msg['Subject'] = f"New Job Openings Found ({len(jobs)} positions)"
         
         # Create both plain text and HTML versions
-        text_content = "New Product Manager positions found:\n\n"
+        text_content = "New Job positions found:\n\n"
         for job in jobs:
             text_content += f"Company: {job['company']}\n"
             text_content += f"Position: {job['title']}\n"
@@ -201,8 +201,8 @@ def send_email_notification(jobs, recipient_email):
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
     else:
-        msg['Subject'] = "Product Manager Jobs Update - No New Positions"
-        body = "No new Product Manager positions were found in this search.\n\n"
+        msg['Subject'] = "Jobs Update - No New Positions"
+        body = "No new positions were found in this search.\n\n"
         body += "Keep checking back for new opportunities!"
         msg.attach(MIMEText(body, 'plain'))
     

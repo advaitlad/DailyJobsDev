@@ -2,19 +2,22 @@ import requests
 from datetime import datetime
 
 def is_product_role(title):
-    """Check if a job title is a product management role"""
-    product_keywords = [
+    """Check if a job title is a product management or program management role"""
+    keywords = [
         'product manager',
         'product owner',
         'technical product manager',
-        'product management'
+        'product management',
+        'program manager',
+        'technical program manager',
+        'program management'
     ]
     
     if not title:
         return False
         
     title_lower = title.lower()
-    return any(keyword in title_lower for keyword in product_keywords)
+    return any(keyword in title_lower for keyword in keywords)
 
 def scrape_greenhouse_jobs(company_name, board_token):
     """Generic function to scrape jobs from any Greenhouse board
