@@ -135,6 +135,11 @@ async function deleteAccount() {
             return;
         }
 
+        // Show initial confirmation dialog
+        if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            return;
+        }
+
         // Create a modal for password input
         const modalHtml = `
             <div id="reauth-modal" class="modal">
