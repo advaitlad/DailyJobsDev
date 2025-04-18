@@ -28,6 +28,9 @@ function populateCompanies(selectedCompanies = []) {
     let selectedCount = 0;
     let availableCount = 0;
     
+    // Create arrays to store labels for sorting
+    const availableLabels = [];
+    
     companies.forEach(company => {
         const label = document.createElement('label');
         label.className = 'company-checkbox-label';
@@ -43,13 +46,16 @@ function populateCompanies(selectedCompanies = []) {
         label.appendChild(checkbox);
         label.appendChild(span);
         
-        // Add to appropriate container
+        // Add to appropriate container or array
         if (selectedCompanies.includes(company)) {
             checkbox.checked = true;
             selectedContainer.appendChild(label);
             selectedCount++;
         } else {
-            availableContainer.appendChild(label);
+            availableLabels.push({
+                label: label,
+                company: company.toLowerCase() // Use lowercase for sorting
+            });
             availableCount++;
         }
         
@@ -61,7 +67,21 @@ function populateCompanies(selectedCompanies = []) {
                 selectedCount++;
                 availableCount--;
             } else {
-                availableContainer.appendChild(label);
+                // When unchecking, insert into available container in sorted order
+                const companies = Array.from(availableContainer.children)
+                    .map(label => label.querySelector('input').value.toLowerCase());
+                companies.push(company.toLowerCase());
+                companies.sort();
+                const index = companies.indexOf(company.toLowerCase());
+                
+                if (index === companies.length - 1) {
+                    availableContainer.appendChild(label);
+                } else {
+                    const nextCompany = companies[index + 1];
+                    const nextLabel = Array.from(availableContainer.children)
+                        .find(l => l.querySelector('input').value.toLowerCase() === nextCompany);
+                    availableContainer.insertBefore(label, nextLabel);
+                }
                 selectedCount--;
                 availableCount++;
             }
@@ -73,6 +93,12 @@ function populateCompanies(selectedCompanies = []) {
             // Toggle no selection message
             noSelectedMessage.style.display = selectedCount === 0 ? 'block' : 'none';
         });
+    });
+    
+    // Sort and append available labels
+    availableLabels.sort((a, b) => a.company.localeCompare(b.company));
+    availableLabels.forEach(item => {
+        availableContainer.appendChild(item.label);
     });
     
     // Set initial counts
