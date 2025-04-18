@@ -135,22 +135,18 @@ async function deleteAccount() {
             return;
         }
 
-        // First confirmation
-        if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-            return;
-        }
-
         // Create a modal for password input
         const modalHtml = `
             <div id="reauth-modal" class="modal">
                 <div class="modal-content">
-                    <h3>Confirm Account Deletion</h3>
-                    <p>Please enter your password to confirm account deletion:</p>
-                    <input type="password" id="reauth-password" class="form-input" />
+                    <h3>Delete Account</h3>
+                    <p>This action cannot be undone. Please enter your password to confirm account deletion:</p>
+                    <input type="password" id="reauth-password" class="form-input" placeholder="Enter your password" />
                     <div class="modal-buttons">
                         <button id="confirm-delete" class="btn btn-danger">Delete Account</button>
                         <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
                     </div>
+                    <div id="delete-error" class="error-message" style="display: none;"></div>
                 </div>
             </div>
         `;
@@ -203,29 +199,72 @@ async function deleteAccount() {
                     gap: 10px;
                     justify-content: flex-end;
                 }
+                .error-message {
+                    color: #ea4335;
+                    margin-top: 10px;
+                    font-size: 14px;
+                    text-align: center;
+                }
+                .btn {
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                }
+                .btn-danger {
+                    background-color: #ea4335;
+                    color: white;
+                }
+                .btn-secondary {
+                    background-color: #f1f3f4;
+                    color: #202124;
+                }
+                .btn:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
             `;
             document.head.appendChild(styles);
         }
 
-        // Return a promise that resolves when the user confirms or cancels
         return new Promise((resolve, reject) => {
             const modal = document.getElementById('reauth-modal');
             const confirmBtn = document.getElementById('confirm-delete');
             const cancelBtn = document.getElementById('cancel-delete');
             const passwordInput = document.getElementById('reauth-password');
+            const errorDiv = document.getElementById('delete-error');
 
             const cleanup = () => {
-                modal.remove();
+                if (modal && modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
             };
 
-            confirmBtn.addEventListener('click', async () => {
-                const password = passwordInput.value;
+            const showError = (message) => {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Delete Account';
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve();
+            };
+
+            confirmBtn.onclick = async () => {
+                const password = passwordInput.value.trim();
                 if (!password) {
-                    showMessage('Please enter your password', true);
+                    showError('Please enter your password');
                     return;
                 }
 
                 try {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Deleting...';
+                    errorDiv.style.display = 'none';
+
                     // Create credential and re-authenticate
                     const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
                     await user.reauthenticateWithCredential(credential);
@@ -241,26 +280,21 @@ async function deleteAccount() {
                 } catch (error) {
                     console.error('Delete account error:', error);
                     if (error.code === 'auth/wrong-password') {
-                        showMessage('Incorrect password. Please try again.', true);
+                        showError('Incorrect password. Please try again.');
                     } else {
-                        showMessage('Failed to delete account. Please try again.', true);
+                        showError('Failed to delete account. Please try again.');
                         cleanup();
                         reject(error);
                     }
                 }
-            });
-
-            cancelBtn.addEventListener('click', () => {
-                cleanup();
-                resolve();
-            });
+            };
 
             // Allow pressing Enter to confirm
-            passwordInput.addEventListener('keyup', (event) => {
+            passwordInput.onkeyup = (event) => {
                 if (event.key === 'Enter') {
                     confirmBtn.click();
                 }
-            });
+            };
         });
     } catch (error) {
         console.error('Delete account error:', error);
