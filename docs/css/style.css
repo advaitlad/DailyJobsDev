@@ -132,21 +132,17 @@ body {
 }
 
 .btn-secondary {
-    background-color: var(--light-gray);
-    color: var(--text-color);
+    background-color: #f1f3f4;
+    color: #202124;
 }
 
 .btn-secondary:hover {
     background-color: #e8eaed;
 }
 
-.btn-danger {
-    background-color: var(--error-color);
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #d33426;
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .divider {
@@ -447,9 +443,4 @@ body {
 
 .verification-actions .btn {
     min-width: 200px;
-}
-
-.btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
 }

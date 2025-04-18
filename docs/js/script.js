@@ -265,21 +265,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // Delete Account Handler
-    const deleteAccountBtn = document.getElementById('delete-account');
-    if (deleteAccountBtn) {
-        deleteAccountBtn.addEventListener('click', async () => {
-            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                try {
-                    const confirmed = await deleteAccount();
-                    if (!confirmed) {
-                        return; // User cancelled in the password modal
-                    }
-                } catch (error) {
-                    showMessage('Failed to delete account: ' + error.message, true);
-                }
-            }
-        });
-    }
 }); 
