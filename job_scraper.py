@@ -26,8 +26,17 @@ def scrape_jobs():
     new_jobs = []
     total_jobs_found = 0
     
+    # Get all users and their preferences
+    users = db.collection('users').get()
+    user_preferences = {}
+    for user in users:
+        user_data = user.to_dict()
+        if 'preferences' in user_data and user_data.get('email'):
+            user_preferences[user_data['email']] = user_data['preferences']
+    
     # Scrape Greenhouse jobs
     print("\nScraping Greenhouse jobs...")
+    all_new_jobs = []
     for company_name, board_token in COMPANIES.items():
         print(f"Scraping jobs from {company_name}...")
         company_jobs = scrape_greenhouse_jobs(company_name, board_token)
@@ -40,14 +49,19 @@ def scrape_jobs():
             if not job_ref:
                 # Add to database
                 db.collection('jobs').add(job)
-                new_jobs.append(job)
+                all_new_jobs.append(job)
                 print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']})")
     
-    # Always send an email, whether there are new jobs or not
-    send_email_notification(new_jobs)
+    # Send personalized emails to each user based on their preferences
+    for email, preferences in user_preferences.items():
+        # Filter jobs based on user preferences
+        user_jobs = [job for job in all_new_jobs if job['company'].lower() in preferences]
+        if user_jobs:
+            send_email_notification(user_jobs, email)
+            print(f"Sent notification to {email} with {len(user_jobs)} matching jobs")
     
-    if new_jobs:
-        print(f"\nFound {len(new_jobs)} new jobs!")
+    if all_new_jobs:
+        print(f"\nFound {len(all_new_jobs)} new jobs in total!")
     else:
         print("\nNo new jobs found.")
 
@@ -150,10 +164,9 @@ def create_html_table(jobs):
     """
     return html
 
-def send_email_notification(jobs):
+def send_email_notification(jobs, recipient_email):
     sender_email = os.getenv('EMAIL_USER')
     sender_password = os.getenv('EMAIL_PASSWORD')
-    recipient_email = os.getenv('RECIPIENT_EMAIL')
     
     msg = MIMEMultipart('alternative')
     msg['From'] = sender_email
@@ -189,9 +202,9 @@ def send_email_notification(jobs):
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
-        print("Email notification sent successfully!")
+        print(f"Email notification sent successfully to {recipient_email}!")
     except Exception as e:
-        print(f"Error sending email: {str(e)}")
+        print(f"Error sending email to {recipient_email}: {str(e)}")
 
 if __name__ == "__main__":
     print("Starting job scraper...")
