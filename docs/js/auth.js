@@ -129,31 +129,34 @@ async function signOut() {
 // Delete Account with re-authentication
 async function deleteAccount() {
     try {
+        // Get the current user
         const user = auth.currentUser;
         if (!user) {
-            showMessage('No user is currently signed in', true);
-            return false;
+            showMessage('No user is currently signed in.', true);
+            return;
         }
 
-        // Create a modal for password verification
-        const modalHtml = `
+        // Create and show the password verification modal
+        const modalHTML = `
             <div id="reauth-modal" class="modal">
                 <div class="modal-content">
-                    <h3>Password Verification</h3>
-                    <p>Please enter your password to delete your account:</p>
-                    <input type="password" id="reauth-password" class="form-input" placeholder="Enter your password" />
+                    <h2>Password Verification</h2>
+                    <p>Please enter your password to delete your account</p>
+                    <div class="form-group">
+                        <input type="password" id="reauth-password" class="form-control" placeholder="Password" required>
+                        <div id="delete-error" class="error-message"></div>
+                    </div>
                     <div class="modal-buttons">
                         <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
                         <button id="confirm-delete" class="btn btn-danger">Delete Account</button>
                     </div>
-                    <div id="delete-error" class="error-message" style="display: none;"></div>
                 </div>
             </div>
         `;
 
         // Add modal to body
         const modalContainer = document.createElement('div');
-        modalContainer.innerHTML = modalHtml;
+        modalContainer.innerHTML = modalHTML;
         document.body.appendChild(modalContainer);
 
         // Add modal styles if not already present
@@ -179,7 +182,7 @@ async function deleteAccount() {
                     max-width: 400px;
                     position: relative;
                 }
-                .modal-content h3 {
+                .modal-content h2 {
                     margin-bottom: 1rem;
                     color: #202124;
                 }
@@ -187,10 +190,13 @@ async function deleteAccount() {
                     margin-bottom: 1rem;
                     color: #5f6368;
                 }
-                .form-input {
+                .form-group {
+                    margin-bottom: 1rem;
+                }
+                .form-control {
                     width: 100%;
                     padding: 8px;
-                    margin-bottom: 1rem;
+                    margin-bottom: 0.5rem;
                     border: 1px solid #dadce0;
                     border-radius: 4px;
                 }
@@ -204,6 +210,7 @@ async function deleteAccount() {
                     margin-top: 10px;
                     font-size: 14px;
                     text-align: center;
+                    display: none;
                 }
                 .btn {
                     padding: 8px 16px;
@@ -236,9 +243,7 @@ async function deleteAccount() {
             const errorDiv = document.getElementById('delete-error');
 
             const cleanup = () => {
-                if (modal && modal.parentNode) {
-                    modal.parentNode.removeChild(modal);
-                }
+                modalContainer.remove();
             };
 
             const showError = (message) => {
