@@ -132,19 +132,19 @@ async function deleteAccount() {
         const user = auth.currentUser;
         if (!user) {
             showMessage('No user is currently signed in', true);
-            return;
+            return false;
         }
 
-        // Create a modal for password input
+        // Create a modal for password verification
         const modalHtml = `
             <div id="reauth-modal" class="modal">
                 <div class="modal-content">
-                    <h3>Delete Account</h3>
-                    <p>This action cannot be undone. Please enter your password to confirm account deletion:</p>
+                    <h3>Password Verification</h3>
+                    <p>Please enter your password to delete your account:</p>
                     <input type="password" id="reauth-password" class="form-input" placeholder="Enter your password" />
                     <div class="modal-buttons">
-                        <button id="confirm-delete" class="btn btn-danger">Delete Account</button>
                         <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
+                        <button id="confirm-delete" class="btn btn-danger">Delete Account</button>
                     </div>
                     <div id="delete-error" class="error-message" style="display: none;"></div>
                 </div>
@@ -299,6 +299,7 @@ async function deleteAccount() {
     } catch (error) {
         console.error('Delete account error:', error);
         showMessage('Failed to delete account. Please try again.', true);
+        return false;
     }
 }
 
