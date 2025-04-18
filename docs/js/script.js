@@ -13,7 +13,7 @@ const companies = [
 ];
 
 // Populate companies grid
-function populateCompanies(selectedCompanies = []) {
+function populateCompanies(selectedCompanies = [], searchTerm = '') {
     const selectedContainer = document.getElementById('selected-companies');
     const availableContainer = document.getElementById('available-companies');
     const noSelectedMessage = document.getElementById('no-selected');
@@ -30,6 +30,7 @@ function populateCompanies(selectedCompanies = []) {
     
     // Create arrays to store labels for sorting
     const availableLabels = [];
+    const selectedLabels = [];
     
     companies.forEach(company => {
         const label = document.createElement('label');
@@ -48,15 +49,22 @@ function populateCompanies(selectedCompanies = []) {
         
         // Add to appropriate container or array
         if (selectedCompanies.includes(company)) {
+            // Always show selected companies regardless of search term
             checkbox.checked = true;
-            selectedContainer.appendChild(label);
+            selectedLabels.push({
+                label: label,
+                company: company.toLowerCase()
+            });
             selectedCount++;
         } else {
-            availableLabels.push({
-                label: label,
-                company: company.toLowerCase() // Use lowercase for sorting
-            });
-            availableCount++;
+            // Only show available companies that match the search term
+            if (!searchTerm || company.toLowerCase().includes(searchTerm.toLowerCase())) {
+                availableLabels.push({
+                    label: label,
+                    company: company.toLowerCase()
+                });
+                availableCount++;
+            }
         }
         
         // Add click handler to move between containers
@@ -100,6 +108,12 @@ function populateCompanies(selectedCompanies = []) {
     availableLabels.forEach(item => {
         availableContainer.appendChild(item.label);
     });
+
+    // Sort and append selected labels
+    selectedLabels.sort((a, b) => a.company.localeCompare(b.company));
+    selectedLabels.forEach(item => {
+        selectedContainer.appendChild(item.label);
+    });
     
     // Set initial counts
     document.getElementById('selected-count').textContent = selectedCount;
@@ -107,6 +121,15 @@ function populateCompanies(selectedCompanies = []) {
     
     // Show/hide no selection message
     noSelectedMessage.style.display = selectedCount === 0 ? 'block' : 'none';
+    noSelectedMessage.textContent = 'You haven\'t selected any companies yet';
+
+    // Show message when no available companies match the search
+    if (availableCount === 0 && searchTerm) {
+        const noMatchesMessage = document.createElement('div');
+        noMatchesMessage.className = 'no-companies';
+        noMatchesMessage.textContent = 'No available companies match your search';
+        availableContainer.appendChild(noMatchesMessage);
+    }
 }
 
 // Load user preferences
@@ -169,6 +192,23 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
+    // Add search functionality
+    const searchInput = document.getElementById('company-search');
+    if (searchInput) {
+        let debounceTimeout;
+        searchInput.addEventListener('input', (e) => {
+            // Clear the previous timeout
+            clearTimeout(debounceTimeout);
+            
+            // Set a new timeout to update the list
+            debounceTimeout = setTimeout(() => {
+                const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+                populateCompanies(selectedCompanies, e.target.value.trim());
+            }, 300); // Wait 300ms after user stops typing
+        });
+    }
+
     // Toggle between signup and login forms
     const authToggle = document.getElementById('authToggle');
     if (authToggle) {
