@@ -143,8 +143,6 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
-    populateCompanies();
-
     // Toggle between signup and login forms
     const authToggle = document.getElementById('authToggle');
     if (authToggle) {
