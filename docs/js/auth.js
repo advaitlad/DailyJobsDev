@@ -392,19 +392,30 @@ function showMessage(message, isError = false, isPreferences = false) {
 let lastVerificationEmailSent = 0;
 const VERIFICATION_EMAIL_COOLDOWN = 60000; // 60 seconds cooldown
 
+// Helper function to show verification messages
+function showVerificationMessage(message, isError = false) {
+    const messageDiv = document.getElementById('verification-message');
+    if (!messageDiv) return;
+
+    messageDiv.textContent = message;
+    messageDiv.className = 'verification-message ' + (isError ? 'error' : 'success');
+    messageDiv.style.display = 'block';
+}
+
 // Resend verification email
 async function resendVerificationEmail() {
-    const resendButton = document.querySelector('button[onclick="resendVerificationEmail()"]');
-    
+    const resendButton = document.getElementById('resend-verification');
+    if (!resendButton) return;
+
     try {
         const user = auth.currentUser;
         if (!user) {
-            showMessage('No user is currently signed in.', true);
+            showVerificationMessage('No user is currently signed in.', true);
             return;
         }
 
         if (user.emailVerified) {
-            showMessage('Your email is already verified.', false);
+            showVerificationMessage('Your email is already verified.', false);
             return;
         }
 
@@ -413,15 +424,13 @@ async function resendVerificationEmail() {
         const timeElapsed = now - lastVerificationEmailSent;
         if (timeElapsed < VERIFICATION_EMAIL_COOLDOWN) {
             const secondsLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
-            showMessage(`Please wait ${secondsLeft} seconds before requesting another verification email.`, true);
+            showVerificationMessage(`Please wait ${secondsLeft} seconds before requesting another verification email.`, true);
             return;
         }
 
-        // Disable button and show sending state
-        if (resendButton) {
-            resendButton.disabled = true;
-            resendButton.textContent = 'Sending...';
-        }
+        // Update button state
+        resendButton.disabled = true;
+        resendButton.textContent = 'Sending...';
 
         // Construct the full URL including protocol
         const continueUrl = 'https://advaitlad.github.io/DailyJobs/';
@@ -433,63 +442,15 @@ async function resendVerificationEmail() {
         await user.sendEmailVerification(actionCodeSettings);
         lastVerificationEmailSent = now;
 
-        // Update button state and show success message
-        if (resendButton) {
-            resendButton.textContent = 'Email Sent ✓';
-            setTimeout(() => {
-                resendButton.disabled = false;
-                resendButton.textContent = 'Resend Verification Email';
-            }, VERIFICATION_EMAIL_COOLDOWN);
-        }
+        // Show success message and update button
+        showVerificationMessage('✓ Verification email sent! Please check your inbox and spam folder.', false);
+        resendButton.textContent = 'Email Sent ✓';
 
-        // Show success message
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'verification-message success';
-        messageDiv.innerHTML = `
-            <p>✓ Verification email sent!</p>
-            <p class="verification-details">
-                • Please check your inbox and spam folder<br>
-                • The verification link will expire in 1 hour<br>
-                • You can request another email in 60 seconds
-            </p>
-        `;
-
-        // Add styles if not already present
-        if (!document.getElementById('verification-message-styles')) {
-            const styles = document.createElement('style');
-            styles.id = 'verification-message-styles';
-            styles.textContent = `
-                .verification-message {
-                    margin: 1rem 0;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    background-color: #e6f4ea;
-                    color: #1e4620;
-                }
-                .verification-message.success {
-                    border-left: 4px solid #34a853;
-                }
-                .verification-message p {
-                    margin: 0;
-                    line-height: 1.5;
-                }
-                .verification-details {
-                    font-size: 0.9rem;
-                    margin-top: 0.5rem !important;
-                    color: #1e4620;
-                }
-            `;
-            document.head.appendChild(styles);
-        }
-
-        // Insert message after the resend button
-        if (resendButton) {
-            const existingMessage = document.querySelector('.verification-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            resendButton.parentNode.insertBefore(messageDiv, resendButton.nextSibling);
-        }
+        // Reset button after cooldown
+        setTimeout(() => {
+            resendButton.disabled = false;
+            resendButton.textContent = 'Resend Verification Email';
+        }, VERIFICATION_EMAIL_COOLDOWN);
 
     } catch (error) {
         console.error('Error sending verification email:', error);
@@ -501,15 +462,21 @@ async function resendVerificationEmail() {
         } else {
             errorMessage += 'Please try again later.';
         }
-        showMessage(errorMessage, true);
-
-        // Reset button state if there was an error
-        if (resendButton) {
-            resendButton.disabled = false;
-            resendButton.textContent = 'Resend Verification Email';
-        }
+        showVerificationMessage(errorMessage, true);
+        
+        // Reset button state
+        resendButton.disabled = false;
+        resendButton.textContent = 'Resend Verification Email';
     }
 }
+
+// Initialize verification email functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const resendButton = document.getElementById('resend-verification');
+    if (resendButton) {
+        resendButton.addEventListener('click', resendVerificationEmail);
+    }
+});
 
 // Update the Delete Account Handler in your initialization code
 document.addEventListener('DOMContentLoaded', () => {
