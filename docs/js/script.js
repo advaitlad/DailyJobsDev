@@ -313,8 +313,27 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox'))
                     .map(checkbox => checkbox.value);
+                
+                // Disable button and show saving state
+                savePreferencesBtn.disabled = true;
+                savePreferencesBtn.textContent = 'Saving...';
+                
                 await saveUserPreferences(selectedCompanies);
+                
+                // Show success state
+                savePreferencesBtn.classList.add('saved');
+                savePreferencesBtn.textContent = '✓ Preferences Saved';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    savePreferencesBtn.disabled = false;
+                    savePreferencesBtn.classList.remove('saved');
+                    savePreferencesBtn.textContent = 'Save Preferences';
+                }, 2000);
             } catch (error) {
+                // Reset button on error
+                savePreferencesBtn.disabled = false;
+                savePreferencesBtn.textContent = 'Save Preferences';
                 showMessage(error.message, true);
             }
         });

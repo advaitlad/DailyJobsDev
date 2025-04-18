@@ -179,10 +179,9 @@ body {
 .preferences-container {
     max-width: 800px;
     margin: 2rem auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding-bottom: 100px;
+    /* Increased space for sticky footer */
+    position: relative;
 }
 
 .user-info {
@@ -233,10 +232,10 @@ body {
 }
 
 .preferences-box {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: white;
     padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .preferences-box h3 {
@@ -411,6 +410,15 @@ body {
     .companies-grid {
         grid-template-columns: 1fr;
     }
+
+    .sticky-footer {
+        padding: 0.875rem 1rem;
+    }
+
+    .sticky-footer .btn {
+        font-size: 0.95rem;
+        padding: 0.75rem;
+    }
 }
 
 .verification-container {
@@ -474,4 +482,59 @@ body {
 
 .verification-actions .btn {
     min-width: 200px;
+}
+
+.sticky-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.sticky-footer .btn {
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0.875rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-footer .btn-primary {
+    background: var(--primary-color);
+    border: none;
+}
+
+.sticky-footer .btn-primary:hover {
+    background: #3367d6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-footer .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Show a success animation when preferences are saved */
+.sticky-footer .btn-primary.saved {
+    background: var(--secondary-color);
+    pointer-events: none;
+}
+
+/* Add smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
 }
