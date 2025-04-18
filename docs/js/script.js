@@ -279,15 +279,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // Google Sign-In Buttons
-    document.querySelectorAll('.google-btn').forEach(button => {
-        button.addEventListener('click', async () => {
-            try {
-                await signInWithGoogle();
-            } catch (error) {
-                showMessage(error.message, true);
-            }
-        });
-    });
 }); 

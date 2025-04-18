@@ -149,20 +149,6 @@ body {
     background-color: #d33426;
 }
 
-.google-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background-color: white;
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-}
-
-.google-btn:hover {
-    background-color: var(--light-gray);
-}
-
 .divider {
     display: flex;
     align-items: center;
