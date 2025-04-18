@@ -31,7 +31,8 @@ def scrape_jobs():
     user_preferences = {}
     for user in users:
         user_data = user.to_dict()
-        if 'preferences' in user_data and user_data.get('email'):
+        # Only include verified users with preferences and email
+        if user_data.get('emailVerified', False) and 'preferences' in user_data and user_data.get('email'):
             user_preferences[user_data['email']] = user_data['preferences']
     
     # Scrape Greenhouse jobs
@@ -52,7 +53,10 @@ def scrape_jobs():
                 all_new_jobs.append(job)
                 print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']})")
     
-    # Send personalized emails to each user based on their preferences
+    # Send personalized emails to each verified user based on their preferences
+    verified_users = len(user_preferences)
+    print(f"\nFound {verified_users} verified users with preferences")
+    
     for email, preferences in user_preferences.items():
         # Filter jobs based on user preferences
         user_jobs = [job for job in all_new_jobs if job['company'].lower() in preferences]

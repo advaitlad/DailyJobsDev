@@ -2,22 +2,44 @@
 const auth = firebase.auth();
 
 // Auth state observer
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(async (user) => {
     if (user) {
+        console.log('Auth state changed:', user.email, 'Verified:', user.emailVerified); // Debug log
+        
         // User is signed in
         document.getElementById('userDisplayName').textContent = user.displayName || 'User';
         document.getElementById('userEmail').textContent = user.email;
+
+        // Force email verification check
+        await user.reload(); // Reload user to get latest verification status
         
-        // Show preferences container and hide auth container
-        document.getElementById('preferences-container').classList.remove('hidden');
+        // Check if email is verified
+        if (!user.emailVerified) {
+            console.log('Email not verified, showing verification container'); // Debug log
+            // Hide all containers except verification
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('preferences-container').classList.add('hidden');
+            document.getElementById('verification-container').classList.remove('hidden');
+            
+            // Show verification required message
+            showMessage('Please verify your email address before continuing. Check your inbox and spam folder.', false);
+            return;
+        }
+
+        console.log('Email verified, showing preferences'); // Debug log
+        // Email is verified, show preferences
         document.getElementById('auth-container').classList.add('hidden');
+        document.getElementById('verification-container').classList.add('hidden');
+        document.getElementById('preferences-container').classList.remove('hidden');
         
         // Load user preferences
-        loadUserPreferences(user.uid);
+        await loadUserPreferences(user.uid);
     } else {
+        console.log('User signed out'); // Debug log
         // User is signed out
-        document.getElementById('preferences-container').classList.add('hidden');
         document.getElementById('auth-container').classList.remove('hidden');
+        document.getElementById('verification-container').classList.add('hidden');
+        document.getElementById('preferences-container').classList.add('hidden');
     }
 });
 
@@ -42,20 +64,54 @@ async function loginWithEmailPassword(email, password) {
 // Email/Password Sign Up
 async function signupWithEmailPassword(fullName, email, password) {
     try {
+        console.log('Starting signup process for:', email); // Debug log
+        
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await userCredential.user.updateProfile({
+        const user = userCredential.user;
+
+        console.log('User created, sending verification email'); // Debug log
+
+        // Send email verification with complete URL
+        const continueUrl = 'https://advaitlad.github.io/DailyJobs/';
+        const actionCodeSettings = {
+            url: continueUrl,
+            handleCodeInApp: true
+        };
+
+        // Ensure verification email is sent
+        await user.sendEmailVerification(actionCodeSettings);
+        console.log('Verification email sent'); // Debug log
+        
+        // Update user profile
+        await user.updateProfile({
             displayName: fullName
         });
         
-        await ensureUserDocument(userCredential.user, fullName);
-        showMessage('Account created successfully!');
+        // Create user document with verified status explicitly set to false
+        await ensureUserDocument(user, fullName, false);
+        
+        // Force a reload of the user to ensure we have the latest state
+        await user.reload();
+        
+        showMessage('✓ Account created! Please check your email (including spam folder) to verify your account. The verification link will expire in 1 hour.', false);
+        
+        // Trigger auth state change to show verification container
+        auth.onAuthStateChanged((user) => {
+            if (user && !user.emailVerified) {
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('preferences-container').classList.add('hidden');
+                document.getElementById('verification-container').classList.remove('hidden');
+            }
+        });
+        
     } catch (error) {
-        console.error('Signup error:', error);
+        console.error('Signup error:', error); // Debug log
         let errorMessage = 'Failed to create account. Please try again.';
         if (error.code === 'auth/email-already-in-use') {
             errorMessage = 'An account already exists with this email. Please sign in.';
         }
         showMessage(errorMessage, true);
+        throw error;
     }
 }
 
@@ -127,13 +183,14 @@ async function loadUserPreferences(userId) {
 }
 
 // Ensure user document exists and is up to date
-async function ensureUserDocument(user, fullName = null) {
+async function ensureUserDocument(user, fullName = null, isVerified = null) {
     try {
         const userDoc = await db.collection('users').doc(user.uid).get();
         const userData = {
             email: user.email,
             name: fullName || user.displayName || 'User',
-            lastSignIn: firebase.firestore.FieldValue.serverTimestamp()
+            lastSignIn: firebase.firestore.FieldValue.serverTimestamp(),
+            emailVerified: isVerified !== null ? isVerified : user.emailVerified
         };
 
         if (!userDoc.exists) {
@@ -153,7 +210,7 @@ async function ensureUserDocument(user, fullName = null) {
     }
 }
 
-// Helper function to show messages
+// Helper function to show messages with better visibility
 function showMessage(message, isError = false, isPreferences = false) {
     const messageDiv = isPreferences ? 
         document.getElementById('preferences-message') : 
@@ -165,7 +222,61 @@ function showMessage(message, isError = false, isPreferences = false) {
     messageDiv.className = isError ? 'message error' : 'message success';
     messageDiv.style.display = 'block';
     
-    setTimeout(() => {
-        messageDiv.style.display = 'none';
-    }, 5000);
+    // Don't auto-hide verification-related messages
+    if (!message.includes('verification') && !message.includes('verify')) {
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Track last verification email sent time
+let lastVerificationEmailSent = 0;
+const VERIFICATION_EMAIL_COOLDOWN = 60000; // 60 seconds cooldown
+
+// Resend verification email
+async function resendVerificationEmail() {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            showMessage('No user is currently signed in.', true);
+            return;
+        }
+
+        if (user.emailVerified) {
+            showMessage('Your email is already verified.', false);
+            return;
+        }
+
+        // Check if enough time has passed since last email
+        const now = Date.now();
+        const timeElapsed = now - lastVerificationEmailSent;
+        if (timeElapsed < VERIFICATION_EMAIL_COOLDOWN) {
+            const secondsLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
+            showMessage(`Please wait ${secondsLeft} seconds before requesting another verification email.`, true);
+            return;
+        }
+
+        // Construct the full URL including protocol
+        const continueUrl = 'https://advaitlad.github.io/DailyJobs/';
+        const actionCodeSettings = {
+            url: continueUrl,
+            handleCodeInApp: true
+        };
+        
+        await user.sendEmailVerification(actionCodeSettings);
+        lastVerificationEmailSent = now;
+        showMessage('✓ Verification email sent! Please check your inbox and spam folder. The verification link will expire in 1 hour.', false);
+    } catch (error) {
+        console.error('Error sending verification email:', error);
+        let errorMessage = 'Failed to send verification email. ';
+        if (error.code === 'auth/too-many-requests') {
+            errorMessage += 'Too many requests. Please try again in a few minutes.';
+        } else if (error.code === 'auth/invalid-continue-uri') {
+            errorMessage += 'Invalid redirect URL. Please contact support.';
+        } else {
+            errorMessage += 'Please try again later.';
+        }
+        showMessage(errorMessage, true);
+    }
 }

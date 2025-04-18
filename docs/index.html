@@ -58,6 +58,18 @@
             </form>
         </div>
 
+        <!-- Email Verification Container -->
+        <div class="verification-container hidden" id="verification-container">
+            <div class="verification-box">
+                <h2>Verify Your Email</h2>
+                <p>We've sent a verification email to your inbox. Please verify your email address to start receiving
+                    job notifications.</p>
+                <p class="verification-note">If you don't see the email, check your spam folder.</p>
+                <button class="btn btn-primary" onclick="resendVerificationEmail()">Resend Verification Email</button>
+                <button class="btn btn-secondary" onclick="signOut()">Sign Out</button>
+            </div>
+        </div>
+
         <div class="preferences-container hidden" id="preferences-container">
             <div class="user-info">
                 <div class="user-details">
