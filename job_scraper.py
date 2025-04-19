@@ -70,7 +70,7 @@ def scrape_jobs():
                 # Add to database
                 db.collection('jobs').add(job_doc)
                 all_new_jobs.append(job)
-                print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']})")
+                print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']}) - Last Updated {job['hours_ago']} hours ago")
     
     # Send personalized emails to each verified user based on their preferences
     verified_users = len(user_preferences)
