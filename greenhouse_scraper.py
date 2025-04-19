@@ -1,5 +1,7 @@
 import requests
 from datetime import datetime
+import json
+import os
 
 def is_product_role(title):
     """Check if a job title is a product management role"""
@@ -92,65 +94,10 @@ def scrape_greenhouse_jobs(company_name, board_token):
         print(f"Error processing jobs for {company_name}: {e}")
         return []
 
-# Define companies and their board tokens
-COMPANIES = {
-    'pinterest': 'pinterest',
-    'samsara': 'samsara',
-    'carvana': 'carvana',
-    'spacex': 'spacex'
-    # 'mongodb': 'mongodb',
-    # 'datadog': 'datadog',
-    # 'robinhood': 'robinhood',
-    # 'brex': 'brex',
-    # 'stripe': 'stripe',
-    # 'airbnb': 'airbnb',
-    # 'dropbox': 'dropbox',
-    # 'asana': 'asana',
-    # 'squarespace': 'squarespace',
-    # 'instacart': 'instacart',
-    # 'beyondfinance': 'beyondfinance',
-    # 'lyft': 'lyft',
-    # 'udemy': 'udemy',
-    # 'wrike': 'wrike',
-    # 'okta': 'okta',
-    # 'yotpo': 'yotpo',
-    # 'upwork': 'upwork',
-    # 'groupon': 'groupon',
-    # 'databricks': 'databricks',
-    # 'twilio': 'twilio',
-    # 'roblox': 'roblox',
-    # 'esri': 'esri',
-    # 'toast': 'toast',
-    # 'affirm': 'affirm',
-    # 'airtable': 'airtable',
-    # 'amplitude': 'amplitude',
-    # 'apptronik': 'apptronik',
-    # 'buzzfeed': 'buzzfeed',
-    # '23andme': '23andme',
-    # 'braze': 'braze',
-    # 'algolia': 'algolia',
-    # 'airbyte': 'airbyte',
-    # 'notion': 'notion',
-    # 'figma': 'figma',
-    # 'retool': 'retool',
-    # 'faire': 'faire',
-    # 'benchling': 'benchling',
-    # 'vercel': 'vercel',
-    # 'snyk': 'snyk',
-    # 'hashicorp': 'hashicorp',
-    # 'postman': 'postman',
-    # 'gitlab': 'gitlab',
-    # 'carta': 'carta',
-    # 'gusto': 'gusto',
-    # 'intercom': 'intercom',
-    # 'netlify': 'netlify',
-    # 'sentry': 'sentry',
-    # 'webflow': 'webflow',
-    # 'discord': 'discord',
-    # 'fivetran': 'fivetran',
-    # 'clickhouse': 'clickhouse',
-    # 'cockroach': 'cockroachlabs'
-}
+# Load companies from JSON config
+config_path = os.path.join('docs', 'companies_config.json')
+with open(config_path, 'r') as f:
+    COMPANIES = json.load(f)['companies']
 
 def main():
     all_jobs = []

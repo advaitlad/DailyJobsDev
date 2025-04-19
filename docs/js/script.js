@@ -1,16 +1,16 @@
-// List of companies (same as in greenhouse_scraper.py)
-const companies = [
-    'pinterest', 'samsara', 'carvana', 'spacex', 'mongodb', 'datadog',
-    'robinhood', 'brex', 'stripe', 'airbnb', 'dropbox', 'asana',
-    'squarespace', 'instacart', 'beyondfinance', 'lyft', 'udemy',
-    'wrike', 'okta', 'yotpo', 'upwork', 'groupon', 'databricks',
-    'twilio', 'roblox', 'esri', 'toast', 'affirm', 'airtable',
-    'amplitude', 'apptronik', 'buzzfeed', '23andme', 'braze',
-    'algolia', 'airbyte', 'notion', 'figma', 'retool', 'faire',
-    'benchling', 'vercel', 'snyk', 'hashicorp', 'postman',
-    'gitlab', 'carta', 'gusto', 'intercom', 'netlify', 'sentry',
-    'webflow', 'discord', 'fivetran', 'clickhouse', 'cockroach'
-];
+// Load companies from JSON config
+let companies = [];
+fetch('./companies_config.json')
+    .then(response => response.json())
+    .then(data => {
+        companies = Object.keys(data.companies);
+        // Initialize the UI with the loaded companies
+        populateCompanies();
+    })
+    .catch(error => {
+        console.error('Error loading companies:', error);
+        showMessage('Error loading companies list. Please refresh the page.', true);
+    });
 
 // Populate companies grid
 function populateCompanies(selectedCompanies = [], searchTerm = '') {
