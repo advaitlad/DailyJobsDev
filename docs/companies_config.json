@@ -71,7 +71,6 @@
         "zuora": "zuora",
         "a16z": "a16z",
         "acommerce": "acommerce",
-        "iaamerican": "iaamerican",
         "xai": "xai",
         "verkada": "verkada",
         "vidyard": "vidyard",
@@ -101,9 +100,6 @@
         "xometry": "xometry",
         "yext": "yext",
         "yougov": "yougov",
-        "yumaai": "yumaai",
-        "zenrows": "zenrows",
-        "zeronetworks": "zeronetworks",
-        "zinnia": "zinnia"
+        "zenrows": "zenrows"
     }
 }

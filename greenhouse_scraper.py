@@ -1,7 +1,11 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
+import time
+from typing import List, Dict
+from dateutil import parser
+from dateutil.tz import tzutc  # Add this import
 
 def is_product_role(title):
     """Check if a job title is a product management role"""
@@ -41,7 +45,15 @@ def get_role_type(title):
         return 'program'
     return None
 
-def scrape_greenhouse_jobs(company_name, board_token):
+def parse_greenhouse_date(date_str: str) -> datetime:
+    """Parse datetime from Greenhouse API which can be in different formats"""
+    try:
+        return parser.parse(date_str)
+    except (ValueError, TypeError) as e:
+        print(f"Error parsing date '{date_str}': {e}")
+        return None
+
+def scrape_greenhouse_jobs(company_name: str, board_token: str) -> List[Dict]:
     """Generic function to scrape jobs from any Greenhouse board
 
     Args:
@@ -49,6 +61,7 @@ def scrape_greenhouse_jobs(company_name, board_token):
         board_token: The board token from the company's Greenhouse URL
     """
     url = f"https://boards-api.greenhouse.io/v1/boards/{board_token}/jobs"
+    last_24h = datetime.now(tzutc()) - timedelta(hours=24)  # Use tzutc() directly
 
     try:
         response = requests.get(url)
@@ -60,9 +73,15 @@ def scrape_greenhouse_jobs(company_name, board_token):
         for job in jobs_data:
             title = job.get('title', 'N/A')
             
-            # Determine role type
+            # Skip if not a product/program role
             role_type = get_role_type(title)
             if not role_type:
+                continue
+            
+            # Parse and check update time
+            updated_at_str = job.get('updated_at', '')
+            updated_at = parse_greenhouse_date(updated_at_str)
+            if not updated_at or updated_at <= last_24h:
                 continue
                 
             try:
@@ -72,16 +91,20 @@ def scrape_greenhouse_jobs(company_name, board_token):
 
             location = job.get('location', {}).get('name', 'N/A')
 
+            # Format the update time for display
+            time_ago = datetime.now(tzutc()) - updated_at  # Use tzutc() directly
+            hours_ago = round(time_ago.total_seconds() / 3600, 1)
+
             job_info = {
                 'company': company_name.title(),
                 'title': title,
                 'location': location,
                 'department': department,
                 'job_id': f"{company_name}_{job.get('id', 'N/A')}",
-                'updated_at': job.get('updated_at', 'N/A'),
+                'hours_ago': hours_ago,
                 'url': job.get('absolute_url', 'N/A'),
-                'date_scraped': datetime.now().isoformat(),
-                'role_type': role_type
+                'role_type': role_type,
+                'updated_at': updated_at  # Pass the datetime object directly
             }
             processed_jobs.append(job_info)
 
@@ -94,41 +117,60 @@ def scrape_greenhouse_jobs(company_name, board_token):
         print(f"Error processing jobs for {company_name}: {e}")
         return []
 
-# Load companies from JSON config
-config_path = os.path.join('docs', 'companies_config.json')
-with open(config_path, 'r') as f:
-    COMPANIES = json.load(f)['companies']
+def load_companies() -> Dict[str, str]:
+    """Load companies from config file"""
+    config_path = os.path.join('docs', 'companies_config.json')
+    with open(config_path, 'r') as f:
+        return json.load(f)['companies']
 
 def main():
+    # Load all companies from config
+    all_companies = load_companies()
+    total_companies = len(all_companies)
     all_jobs = []
 
+    print(f"Checking {total_companies} companies for jobs posted/updated in the last 24 hours...")
+
     # Scrape jobs from each company
-    for company_name, board_token in COMPANIES.items():
-        print(f"\nScraping jobs from {company_name.title()}...")
+    for idx, (company_name, board_token) in enumerate(all_companies.items(), 1):
+        print(f"\nChecking {company_name.title()} ({idx}/{total_companies})...")
         jobs = scrape_greenhouse_jobs(company_name, board_token)
         if jobs:
             all_jobs.extend(jobs)
-            print(f"Found {len(jobs)} jobs")
-        else:
-            print(f"No jobs found or error occurred")
+            print(f"Found {len(jobs)} new jobs")
+            
+        # Add delay between requests to avoid rate limiting
+        if idx < total_companies:
+            time.sleep(1.0)
+
+    if not all_jobs:
+        print("\nNo new jobs found in the last 24 hours.")
+        return
+
+    # Sort jobs by update time (most recent first)
+    all_jobs.sort(key=lambda x: x['hours_ago'])
 
     # Print all jobs
-    print("\nAll Jobs Found:")
+    print("\nJobs Updated in Last 24 Hours:")
+    print("=" * 80)
     for job in all_jobs:
         print(f"\nCompany: {job['company']}")
         print(f"Title: {job['title']}")
         print(f"Location: {job['location']}")
         print(f"Department: {job['department']}")
-        print(f"Job ID: {job['job_id']}")
+        print(f"Updated: {job['updated_at']} ({job['hours_ago']} hours ago)")
         print(f"URL: {job['url']}")
         print("-" * 80)
 
     # Print summary
     print("\nSummary:")
-    print(f"Total jobs scraped: {len(all_jobs)}")
-    for company in sorted(set(job['company'] for job in all_jobs)):
-        company_jobs = len([job for job in all_jobs if job['company'] == company])
-        print(f"{company}: {company_jobs} jobs")
+    print(f"Total new jobs found: {len(all_jobs)}")
+    companies_with_jobs = {}
+    for job in all_jobs:
+        companies_with_jobs[job['company']] = companies_with_jobs.get(job['company'], 0) + 1
+    
+    for company, count in sorted(companies_with_jobs.items()):
+        print(f"{company}: {count} new jobs")
 
 if __name__ == "__main__":
     main() 

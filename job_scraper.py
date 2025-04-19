@@ -9,7 +9,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
-from greenhouse_scraper import scrape_greenhouse_jobs, COMPANIES
+from greenhouse_scraper import scrape_greenhouse_jobs, load_companies
+from dateutil import parser
 
 # Load environment variables
 load_dotenv()
@@ -19,7 +20,8 @@ cred = credentials.Certificate(os.getenv('FIREBASE_CREDENTIALS_PATH'))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Use the company list from greenhouse_scraper.py
+# Load companies from config
+COMPANIES = load_companies()
 GREENHOUSE_COMPANIES = list(COMPANIES.keys())
 
 def scrape_jobs():
@@ -51,12 +53,22 @@ def scrape_jobs():
         total_jobs_found += len(company_jobs)
         
         for job in company_jobs:
+            # Create the job document with timestamp
+            job_doc = {
+                **job,  # Include all existing job fields
+                'last_updated': job['updated_at'],  # Use the datetime object directly
+                'added_to_db': firestore.SERVER_TIMESTAMP  # When we added it to the database
+            }
+            
+            # Remove the temporary updated_at field since we now have last_updated
+            job_doc.pop('updated_at', None)
+            
             # Check if job already exists in database using job_id
             job_ref = db.collection('jobs').where('job_id', '==', job['job_id']).get()
             
             if not job_ref:
                 # Add to database
-                db.collection('jobs').add(job)
+                db.collection('jobs').add(job_doc)
                 all_new_jobs.append(job)
                 print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']})")
     
@@ -89,6 +101,7 @@ def create_html_table(jobs):
     html = """
     <html>
     <head>
+    <div><h1>Job Openings Updated in the Last 24 Hours</h1></div>
     <style>
         table {
             border-collapse: collapse;
@@ -211,7 +224,7 @@ def send_email_notification(jobs, recipient_email):
         msg.attach(MIMEText(html_content, 'html'))
     else:
         msg['Subject'] = "Jobs Update - No New Positions"
-        body = "No new positions were found in this search.\n\n"
+        body = "No new positions were updated in the last 24 hours.\n\n"
         body += "Keep checking back for new opportunities!"
         msg.attach(MIMEText(body, 'plain'))
     
