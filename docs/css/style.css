@@ -286,7 +286,6 @@ body {
 /* Companies Layout */
 .companies-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
     margin-top: 2rem;
 }
@@ -297,6 +296,11 @@ body {
     padding: 2rem;
     box-shadow: var(--shadow-lg);
     margin: 0;
+    margin-bottom: 2rem;
+}
+
+.companies-section:last-child {
+    margin-bottom: 0;
 }
 
 .section-header {
