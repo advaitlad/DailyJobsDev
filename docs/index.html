@@ -85,66 +85,71 @@
                 </div>
             </div>
 
-            <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18l-6-6 6-6" />
-                </svg>
-            </button>
-
             <div class="preferences-box">
-                <h3>Job Preferences</h3>
-                <div id="preferences-message" class="message"></div>
+                <div class="preferences-header">
+                    <button class="sidebar-toggle" id="sidebar-toggle" title="Main menu">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 12h18M3 6h18M3 18h18" />
+                        </svg>
+                    </button>
+                    <h3>Job Preferences</h3>
+                </div>
 
-                <!-- Job Type Preferences -->
-                <div class="preferences-section">
-                    <div class="section-header">
-                        <div class="header-main">
-                            <h4>Job Types</h4>
+                <div class="preferences-content">
+                    <div id="preferences-message" class="message"></div>
+
+                    <!-- Job Type Preferences -->
+                    <div class="preferences-section">
+                        <div class="section-header">
+                            <div class="header-main">
+                                <h4>Job Types</h4>
+                            </div>
+                        </div>
+                        <div class="job-types-grid">
+                            <label class="job-type-checkbox-label">
+                                <input type="checkbox" class="job-type-checkbox" value="product" checked>
+                                <span>Product Manager</span>
+                            </label>
+                            <label class="job-type-checkbox-label">
+                                <input type="checkbox" class="job-type-checkbox" value="program" checked>
+                                <span>Program Manager</span>
+                            </label>
                         </div>
                     </div>
-                    <div class="job-types-grid">
-                        <label class="job-type-checkbox-label">
-                            <input type="checkbox" class="job-type-checkbox" value="product" checked>
-                            <span>Product Manager</span>
-                        </label>
-                        <label class="job-type-checkbox-label">
-                            <input type="checkbox" class="job-type-checkbox" value="program" checked>
-                            <span>Program Manager</span>
-                        </label>
+
+                    <div class="companies-section">
+                        <div class="section-header">
+                            <div class="header-main">
+                                <h4>Selected Companies <span class="count" id="selected-count">0</span></h4>
+                                <button class="btn btn-bad" id="remove-all-btn">Remove All</button>
+                            </div>
+                        </div>
+                        <div class="companies-grid" id="selected-companies">
+                            <div class="no-companies" id="no-selected">You haven't selected any companies yet</div>
+                        </div>
+                    </div>
+
+                    <div class="companies-section">
+                        <div class="section-header">
+                            <div class="header-main">
+                                <h4>Available Companies <span class="count" id="available-count">0</span></h4>
+                                <button class="btn btn-good" id="add-all-btn">Select All</button>
+                            </div>
+                            <div class="search-container">
+                                <input type="text" id="company-search" class="search-input"
+                                    placeholder="Search available companies...">
+                            </div>
+                        </div>
+                        <div class="companies-grid" id="available-companies">
+                            <!-- Companies will be added dynamically -->
+                        </div>
                     </div>
                 </div>
 
-                <div class="companies-section">
-                    <div class="section-header">
-                        <div class="header-main">
-                            <h4>Selected Companies <span class="count" id="selected-count">0</span></h4>
-                            <button class="btn btn-bad" id="remove-all-btn">Remove All</button>
-                        </div>
-                    </div>
-                    <div class="companies-grid" id="selected-companies">
-                        <div class="no-companies" id="no-selected">You haven't selected any companies yet</div>
-                    </div>
+                <div class="sticky-footer">
+                    <button class="btn btn-primary" id="save-preferences">Save Preferences</button>
                 </div>
-
-                <div class="companies-section">
-                    <div class="section-header">
-                        <div class="header-main">
-                            <h4>Available Companies <span class="count" id="available-count">0</span></h4>
-                            <button class="btn btn-good" id="add-all-btn">Select All</button>
-                        </div>
-                        <div class="search-container">
-                            <input type="text" id="company-search" class="search-input"
-                                placeholder="Search available companies...">
-                        </div>
-                    </div>
-                    <div class="companies-grid" id="available-companies">
-                        <!-- Companies will be added dynamically -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="sticky-footer">
-                <button class="btn btn-primary" id="save-preferences">Save Preferences</button>
             </div>
         </div>
     </div>
