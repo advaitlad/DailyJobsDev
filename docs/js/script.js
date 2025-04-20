@@ -433,4 +433,25 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('verification-container').classList.add('hidden');
         }
     });
+
+    // Sidebar toggle functionality
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const userInfo = document.getElementById('user-info');
+    const preferencesContainer = document.getElementById('preferences-container');
+
+    if (sidebarToggle && userInfo) {
+        // Check local storage for saved state
+        const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isSidebarCollapsed) {
+            userInfo.classList.add('collapsed');
+            sidebarToggle.classList.add('collapsed');
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            userInfo.classList.toggle('collapsed');
+            sidebarToggle.classList.toggle('collapsed');
+            // Save state to local storage
+            localStorage.setItem('sidebarCollapsed', userInfo.classList.contains('collapsed'));
+        });
+    }
 }); 
