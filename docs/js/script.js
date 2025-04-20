@@ -394,6 +394,20 @@ document.addEventListener('DOMContentLoaded', () => {
         savePreferencesBtn.addEventListener('click', savePreferences);
     }
 
+    // Sign out button handler
+    const signOutBtn = document.getElementById('sign-out');
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await signOut();
+                // The auth state observer will handle UI updates
+            } catch (error) {
+                console.error('Error signing out:', error);
+                showMessage('Failed to sign out. Please try again.', true);
+            }
+        });
+    }
+
     // Initialize auth state observer
     auth.onAuthStateChanged((user) => {
         if (user) {
