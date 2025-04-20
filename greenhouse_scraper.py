@@ -37,12 +37,35 @@ def is_program_role(title):
     title_lower = title.lower()
     return any(keyword in title_lower for keyword in program_keywords)
 
+def is_data_analyst_role(title):
+    """Check if a job title is a data analyst role"""
+    data_keywords = [
+        'data analyst',
+        'analytics analyst',
+        'data analytics',
+        'Tableau Analyst',
+        'Power BI Analyst',
+        'SQL Data Analyst',
+        'Data Operations Analyst',
+        'Tableau Specialist',
+        'Power BI Specialist',
+        'analytics associate'
+    ]
+    
+    if not title:
+        return False
+        
+    title_lower = title.lower()
+    return any(keyword in title_lower for keyword in data_keywords)
+
 def get_role_type(title):
-    """Determine if a role is a product or program management position"""
+    """Determine if a role is a product, program management, or data analyst position"""
     if is_product_role(title):
         return 'product'
     elif is_program_role(title):
         return 'program'
+    elif is_data_analyst_role(title):
+        return 'data'
     return None
 
 def parse_greenhouse_date(date_str: str) -> datetime:
