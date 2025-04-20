@@ -1,10 +1,20 @@
 :root {
-    --primary-color: #4285f4;
-    --secondary-color: #34a853;
-    --error-color: #ea4335;
-    --text-color: #202124;
-    --light-gray: #f1f3f4;
-    --border-color: #dadce0;
+    --primary-color: #2E7D32;
+    --primary-hover: #1B5E20;
+    --secondary-color: #757575;
+    --danger-color: #D32F2F;
+    --success-color: #43b548;
+    --background-color: #f8f9fa;
+    --border-color: #E0E0E0;
+    --text-primary: #1A1A1A;
+    --text-secondary: #666666;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --sidebar-width: 280px;
 }
 
 * {
@@ -14,16 +24,21 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    line-height: 1.6;
-    color: var(--text-color);
-    background-color: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
 }
 
 /* Auth Container Styles */
@@ -193,209 +208,246 @@ body {
     text-decoration: underline;
 }
 
-/* Preferences Container Styles */
-.preferences-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding-bottom: 100px;
-    /* Increased space for sticky footer */
-    position: relative;
-}
-
+/* User Info Sidebar */
 .user-info {
+    width: var(--sidebar-width);
+    background: white;
+    padding: 2rem;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-    padding: 1rem;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
 }
 
 .user-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .user-details h2 {
-    font-size: 1.25rem;
-    margin-bottom: 0.25rem;
-    color: var(--text-color);
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--text-primary);
 }
 
 .user-details p {
-    color: #666;
-    font-size: 0.95rem;
-    margin: 0;
+    color: var(--text-secondary);
+    margin: 0.5rem 0 0;
 }
 
 .action-buttons {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
+    margin-top: auto;
 }
 
 .action-buttons .btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    width: 100%;
 }
 
-.profile-photo {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-bottom: 1rem;
+/* Main Content Area */
+.preferences-container {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: 2rem;
+    max-width: none;
 }
 
 .preferences-box {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
 }
 
 .preferences-box h3 {
-    margin-bottom: 1.5rem;
-    color: var(--text-color);
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+}
+
+/* Job Types Section */
+.preferences-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.job-types-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+/* Companies Layout */
+.companies-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.companies-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    margin: 0;
 }
 
 .section-header {
-    margin-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    margin-bottom: 2rem;
 }
 
 .header-main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.section-header h4 {
+.header-main h4 {
+    font-size: 1.25rem;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
-.section-actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
+.count {
+    background: #E8F5E9;
+    color: var(--primary-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .search-container {
-    width: 100%;
+    position: relative;
+    margin-top: 0;
 }
 
 .search-input {
     width: 100%;
     padding: 0.75rem 1rem;
-    font-size: 0.95rem;
+    padding-left: 2.5rem;
     border: 2px solid var(--border-color);
-    border-radius: 8px;
-    background-color: white;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
     transition: all 0.2s ease;
 }
 
 .search-input:focus {
-    outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
 }
 
-.search-input::placeholder {
-    color: #999;
-}
-
-#add-all-btn,
-#remove-all-btn {
-    padding: 0.75rem 1rem;
-    white-space: nowrap;
-}
-
-.companies-section {
-    background-color: var(--light-gray);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.companies-section h4 {
-    color: var(--text-color);
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.companies-section h4 .count {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 0.2rem 0.6rem;
-    border-radius: 12px;
-    font-size: 0.9rem;
+.search-container::before {
+    content: '🔍';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1rem;
 }
 
 .companies-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.companies-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.companies-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.companies-grid::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.companies-grid::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }
 
 .company-checkbox-label {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
     padding: 0.75rem 1rem;
     background: white;
-    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid var(--border-color);
 }
 
 .company-checkbox-label:hover {
-    background-color: #f8f9fa;
     border-color: var(--primary-color);
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
 }
 
-.company-checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+/* Custom Checkbox */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
     border: 2px solid var(--border-color);
     border-radius: 4px;
+    margin-right: 0.75rem;
+    position: relative;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.company-checkbox-label input[type="checkbox"]:checked {
+input[type="checkbox"]:checked {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
 }
 
-.company-checkbox-label span {
-    font-size: 0.95rem;
-    color: var(--text-color);
-    font-weight: 500;
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
 }
 
-.no-companies {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-    font-size: 0.95rem;
+/* Sticky Footer */
+.sticky-footer {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: auto;
     background: white;
-    border-radius: 8px;
-    border: 1px dashed var(--border-color);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+}
+
+.sticky-footer .btn {
+    min-width: 200px;
 }
 
 /* Message Styles */
@@ -408,13 +460,13 @@ body {
 
 .message.error {
     background-color: #fdecea;
-    color: var(--error-color);
+    color: var(--danger-color);
     display: block;
 }
 
 .message.success {
     background-color: #e6f4ea;
-    color: var(--secondary-color);
+    color: var(--success-color);
     display: block;
 }
 
@@ -424,226 +476,56 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .companies-container {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     .container {
-        padding: 1rem;
-    }
-
-    .auth-container,
-    .preferences-container {
-        margin: 1rem auto;
-        padding: 1.5rem;
+        flex-direction: column;
     }
 
     .user-info {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-
-    .user-details {
-        align-items: center;
-    }
-
-    .action-buttons {
+        position: static;
         width: 100%;
-        justify-content: center;
+        padding: 1rem;
+    }
+
+    .preferences-container {
+        margin-left: 0;
+        padding: 1rem;
     }
 
     .companies-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        max-height: none;
     }
 
     .sticky-footer {
-        padding: 0.875rem 1rem;
-    }
-
-    .sticky-footer .btn {
-        font-size: 0.95rem;
-        padding: 0.75rem;
-    }
-
-    .header-main {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .section-actions {
-        width: 100%;
-    }
-
-    #add-all-btn,
-    #remove-all-btn {
-        width: 100%;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 0;
     }
 }
 
-.verification-container {
-    max-width: 500px;
-    margin: 2rem auto;
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.verification-box {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.verification-box h2 {
-    color: var(--text-color);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.verification-box p {
-    color: #666;
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-}
-
-.verification-note {
-    font-size: 0.9rem;
-    color: #888;
-    margin-bottom: 2rem;
-}
-
-.verification-message {
-    margin: 1rem 0;
-    padding: 1rem;
-    border-radius: 8px;
-    display: none;
-}
-
-.verification-message.error {
-    background-color: #fdecea;
-    color: var(--error-color);
-    border-left: 4px solid var(--error-color);
-    display: block;
-}
-
-.verification-message.success {
-    background-color: #e6f4ea;
-    color: var(--secondary-color);
-    border-left: 4px solid var(--secondary-color);
-    display: block;
-}
-
-.verification-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 1.5rem;
-}
-
-.verification-actions .btn {
-    min-width: 200px;
-}
-
-.sticky-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
-}
-
-.sticky-footer .btn {
-    max-width: 400px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0.875rem;
-    font-size: 1rem;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.sticky-footer .btn-primary {
-    background: var(--primary-color);
-    border: none;
-}
-
-.sticky-footer .btn-primary:hover {
-    background: #3367d6;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.sticky-footer .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Show a success animation when preferences are saved */
-.sticky-footer .btn-primary.saved {
-    background: var(--secondary-color);
-    pointer-events: none;
-}
-
-/* Add smooth scroll behavior */
-html {
-    scroll-behavior: smooth;
-}
-
-.preferences-section {
-    background-color: var(--light-gray);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.job-types-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.job-type-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: white;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid var(--border-color);
-}
-
-.job-type-checkbox-label:hover {
-    background-color: #f8f9fa;
-    border-color: var(--primary-color);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.job-type-checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.job-type-checkbox-label input[type="checkbox"]:checked {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.job-type-checkbox-label span {
-    font-size: 0.95rem;
-    color: var(--text-color);
-    font-weight: 500;
+.preferences-box,
+.companies-section {
+    animation: fadeIn 0.3s ease-out;
 }
