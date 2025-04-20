@@ -438,20 +438,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const userInfo = document.querySelector('.user-info');
     const preferencesContainer = document.querySelector('.preferences-container');
+    const stickyFooter = document.querySelector('.sticky-footer');
 
-    if (sidebarToggle && userInfo && preferencesContainer) {
+    if (sidebarToggle && userInfo && preferencesContainer && stickyFooter) {
         // Check local storage for saved state
         const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         if (isSidebarCollapsed) {
             userInfo.classList.add('collapsed');
             sidebarToggle.classList.add('collapsed');
             preferencesContainer.classList.add('sidebar-collapsed');
+            stickyFooter.classList.add('sidebar-collapsed');
         }
 
         sidebarToggle.addEventListener('click', () => {
             userInfo.classList.toggle('collapsed');
             sidebarToggle.classList.toggle('collapsed');
             preferencesContainer.classList.toggle('sidebar-collapsed');
+            stickyFooter.classList.toggle('sidebar-collapsed');
             // Save state to local storage
             localStorage.setItem('sidebarCollapsed', userInfo.classList.contains('collapsed'));
         });
