@@ -140,10 +140,16 @@ body {
 .btn-primary {
     background-color: var(--primary-color);
     color: white;
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: #3367d6;
+    background-color: var(--primary-hover);
+}
+
+.btn-primary.saved {
+    background-color: var(--success-color);
+    pointer-events: none;
 }
 
 .btn-secondary {
