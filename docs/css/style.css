@@ -340,20 +340,21 @@ body {
 }
 
 .job-types-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
 .job-type-checkbox-label {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    padding: 12px;
+    padding: 8px 16px;
     background: white;
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .job-type-checkbox-label:hover {
@@ -362,7 +363,7 @@ body {
 }
 
 .job-type-checkbox-label input[type="checkbox"] {
-    margin-right: 12px;
+    margin-right: 8px;
 }
 
 /* Companies Layout */
