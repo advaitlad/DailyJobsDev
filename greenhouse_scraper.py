@@ -43,16 +43,12 @@ def is_data_analyst_role(title):
         'data analyst',
         'analytics analyst',
         'data analytics',
-        'Tableau Analyst',
-        'Power BI Analyst',
-        'SQL Data Analyst',
-        'Tableau Specialist',
-        'Power BI Specialist',
-        'BI Analyst',
-        'Business Intelligence Analyst',
-        'Business Intelligence Engineer',
-        'Data Reporting Analyst',
-        'Insights Analyst'
+        'Insights Analyst',
+        'Product Analyst',
+        'Product Insights Analyst'
+        'Data Analytics',
+        'Product Analytics',
+        'Experimenttaion Analyst'
     ]
     
     if not title:
@@ -85,8 +81,36 @@ def is_data_scientist_role(title):
     title_lower = title.lower()
     return any(keyword in title_lower for keyword in scientist_keywords)
 
+def is_bi_engineer_role(title):
+    """Check if a job title is a BI/Data Visualization Engineer role"""
+    bi_keywords = [
+        'business intelligence engineer',
+        'data visualization engineer',
+        'business intelligence analyst',
+        'data visualization analyst'
+        'tableau developer',
+        'power bi developer',
+        'data visualization specialist',
+        'Tableau Analyst',
+        'Power BI Analyst',
+        'Tableau Specialist',
+        'Power BI Specialist',
+        'BI Analyst',
+        'BI Engineer',
+        'Business Intelligence Analyst',
+        'data visualization analyst',
+        'Data Reporting Analyst',
+        'Business Analytics'
+    ]
+    
+    if not title:
+        return False
+        
+    title_lower = title.lower()
+    return any(keyword in title_lower for keyword in bi_keywords)
+
 def get_role_type(title):
-    """Determine if a role is a product, program management, data analyst, business analyst, or data scientist position"""
+    """Determine if a role is a product, program management, data analyst, business analyst, data scientist, or BI engineer position"""
     if is_product_role(title):
         return 'product'
     elif is_program_role(title):
@@ -97,6 +121,8 @@ def get_role_type(title):
         return 'business'
     elif is_data_scientist_role(title):
         return 'scientist'
+    elif is_bi_engineer_role(title):
+        return 'bi'
     return None
 
 def parse_greenhouse_date(date_str: str) -> datetime:
