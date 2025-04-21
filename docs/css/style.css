@@ -370,7 +370,7 @@ body {
 /* Info icon styles */
 .info-icon {
     display: inline-flex;
-    align-items: center;
+    align-items: left;
     justify-content: center;
     width: 16px;
     height: 16px;
@@ -460,6 +460,12 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+.hover-instruction {
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: var(--text-secondary);
 }
 
 .count {
