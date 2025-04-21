@@ -375,18 +375,19 @@ body {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #F5F5F5;
-    color: #757575;
-    font-size: 12px;
+    background: #ffffff;
+    color: #2061b1;
+    font-size: 10px;
+    font-weight: 500;
     margin-left: 8px;
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
+    border: 1px solid #2061b1;
 }
 
 .info-icon:hover {
-    background: #EEEEEE;
-    color: #424242;
+    background: #ffffff;
 }
 
 /* Tooltip styles */
@@ -396,7 +397,7 @@ body {
     left: calc(100% + 10px);
     top: 50%;
     transform: translateY(-50%);
-    background: white;
+    background: rgb(255, 255, 255);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 12px;
