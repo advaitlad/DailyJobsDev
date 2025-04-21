@@ -375,12 +375,18 @@ body {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #E8F5E9;
-    color: var(--primary-color);
+    background: #F5F5F5;
+    color: #757575;
     font-size: 12px;
     margin-left: 8px;
     cursor: help;
     position: relative;
+    transition: all 0.2s ease;
+}
+
+.info-icon:hover {
+    background: #EEEEEE;
+    color: #424242;
 }
 
 /* Tooltip styles */
