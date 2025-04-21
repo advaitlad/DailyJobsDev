@@ -355,6 +355,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    position: relative;
 }
 
 .job-type-checkbox-label:hover {
@@ -364,6 +365,55 @@ body {
 
 .job-type-checkbox-label input[type="checkbox"] {
     margin-right: 8px;
+}
+
+/* Info icon styles */
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #E8F5E9;
+    color: var(--primary-color);
+    font-size: 12px;
+    margin-left: 8px;
+    cursor: help;
+    position: relative;
+}
+
+/* Tooltip styles */
+.tooltip {
+    visibility: hidden;
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    width: max-content;
+    max-width: 300px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.tooltip ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.tooltip li {
+    margin: 4px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* Show tooltip on hover */
+.info-icon:hover .tooltip {
+    visibility: visible;
 }
 
 /* Companies Layout */
