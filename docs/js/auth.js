@@ -215,8 +215,9 @@ function showMessage(message, isError = false, isPreferences = false) {
 // Track last verification email sent time and retry count
 let lastVerificationEmailSent = 0;
 let retryCount = 0;
-const VERIFICATION_EMAIL_COOLDOWN = 300000; // 5 minutes cooldown
+const VERIFICATION_EMAIL_COOLDOWN = 60000; // 1 minute cooldown
 const MAX_RETRIES = 3;
+const RETRY_RESET_TIME = 3600000; // 1 hour to reset retry count
 
 // Helper function to show verification messages
 function showVerificationMessage(message, isError = false) {
@@ -275,6 +276,10 @@ function startTimer(duration) {
                 resendButton.disabled = false;
                 resendButton.textContent = 'Resend Verification Email';
             }
+            // Reset retry count if enough time has passed
+            if (Date.now() - lastVerificationEmailSent >= RETRY_RESET_TIME) {
+                retryCount = 0;
+            }
         }
     }, 1000);
 }
@@ -291,40 +296,60 @@ async function resendVerificationEmail() {
             return;
         }
 
+        // Force reload user to get latest verification status
+        await user.reload();
+        
         if (user.emailVerified) {
-            showVerificationMessage('Your email is already verified.', false);
+            showVerificationMessage('Your email is already verified! Refreshing page...', false);
+            setTimeout(() => window.location.reload(), 2000);
+            return;
+        }
+
+        // Check if retry count exceeded
+        if (retryCount >= MAX_RETRIES) {
+            const resetTime = new Date(lastVerificationEmailSent + RETRY_RESET_TIME);
+            const timeUntilReset = Math.ceil((RETRY_RESET_TIME - (Date.now() - lastVerificationEmailSent)) / 60000);
+            showVerificationMessage(`Maximum retry limit reached. Please wait ${timeUntilReset} minutes before trying again.`, true);
+            startTimer(timeUntilReset * 60);
             return;
         }
 
         // Check if enough time has passed since last email
         const now = Date.now();
         const timeElapsed = now - lastVerificationEmailSent;
+        
         if (timeElapsed < VERIFICATION_EMAIL_COOLDOWN) {
-            const secondsLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
-            showVerificationMessage(`Please wait before requesting another verification email.`, true);
-            startTimer(secondsLeft);
+            const waitTime = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
+            showVerificationMessage(`Please wait ${Math.ceil(waitTime/60)} minute(s) before requesting another verification email.`, true);
+            startTimer(waitTime);
             return;
+        }
+
+        // Reset retry count if enough time has passed
+        if (timeElapsed >= RETRY_RESET_TIME) {
+            retryCount = 0;
         }
 
         // Update button state
         resendButton.disabled = true;
         resendButton.textContent = 'Sending...';
 
-        // Construct the full URL including protocol
-        const continueUrl = window.location.origin + window.location.pathname;
+        // Construct the action code settings
         const actionCodeSettings = {
-            url: continueUrl,
+            url: window.location.href,
             handleCodeInApp: true
         };
         
         await user.sendEmailVerification(actionCodeSettings);
         lastVerificationEmailSent = now;
+        retryCount++;
 
         // Show success message and update button
-        showVerificationMessage('✓ Verification email sent! Please check your inbox and spam folder.', false);
+        const remainingAttempts = MAX_RETRIES - retryCount;
+        showVerificationMessage(`✓ Verification email sent! Please check your inbox and spam folder. You have ${remainingAttempts} attempt(s) remaining.`, false);
         resendButton.textContent = 'Email Sent ✓';
 
-        // Start the timer
+        // Start the cooldown timer
         startTimer(VERIFICATION_EMAIL_COOLDOWN / 1000);
 
     } catch (error) {
@@ -332,8 +357,8 @@ async function resendVerificationEmail() {
         let errorMessage = 'Failed to send verification email. ';
         
         if (error.code === 'auth/too-many-requests') {
-            const waitTime = Math.min(30, Math.pow(2, retryCount)) * 60;
-            errorMessage += `Please try again later.`;
+            const waitTime = Math.min(30, Math.pow(2, retryCount)) * 60; // Exponential backoff
+            errorMessage = `Too many attempts. Please wait ${Math.ceil(waitTime/60)} minutes before trying again.`;
             startTimer(waitTime);
             retryCount++;
         } else if (error.code === 'auth/invalid-continue-uri') {
