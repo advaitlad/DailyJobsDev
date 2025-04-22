@@ -223,7 +223,18 @@ function showVerificationMessage(message, isError = false) {
     const messageDiv = document.getElementById('verification-message');
     if (!messageDiv) return;
 
-    messageDiv.textContent = message;
+    // Create a more prominent message for wait times
+    if (message.includes('wait') || message.includes('minutes')) {
+        messageDiv.innerHTML = `
+            <div class="verification-wait-message">
+                <div class="wait-icon">⏳</div>
+                <div class="wait-text">${message}</div>
+            </div>
+        `;
+    } else {
+        messageDiv.textContent = message;
+    }
+    
     messageDiv.className = 'verification-message ' + (isError ? 'error' : 'success');
     messageDiv.style.display = 'block';
 }
