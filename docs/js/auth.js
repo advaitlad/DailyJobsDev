@@ -212,9 +212,11 @@ function showMessage(message, isError = false, isPreferences = false) {
     }
 }
 
-// Track last verification email sent time
+// Track last verification email sent time and retry count
 let lastVerificationEmailSent = 0;
-const VERIFICATION_EMAIL_COOLDOWN = 60000; // 60 seconds cooldown
+let retryCount = 0;
+const VERIFICATION_EMAIL_COOLDOWN = 300000; // 5 minutes cooldown
+const MAX_RETRIES = 3;
 
 // Helper function to show verification messages
 function showVerificationMessage(message, isError = false) {
@@ -247,8 +249,8 @@ async function resendVerificationEmail() {
         const now = Date.now();
         const timeElapsed = now - lastVerificationEmailSent;
         if (timeElapsed < VERIFICATION_EMAIL_COOLDOWN) {
-            const secondsLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
-            showVerificationMessage(`Please wait ${secondsLeft} seconds before requesting another verification email.`, true);
+            const minutesLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 60000);
+            showVerificationMessage(`Please wait ${minutesLeft} minutes before requesting another verification email.`, true);
             return;
         }
 
@@ -257,7 +259,7 @@ async function resendVerificationEmail() {
         resendButton.textContent = 'Sending...';
 
         // Construct the full URL including protocol
-        const continueUrl = 'https://advaitlad.github.io/DailyJobsDev/';
+        const continueUrl = window.location.origin + window.location.pathname;
         const actionCodeSettings = {
             url: continueUrl,
             handleCodeInApp: true
@@ -265,6 +267,7 @@ async function resendVerificationEmail() {
         
         await user.sendEmailVerification(actionCodeSettings);
         lastVerificationEmailSent = now;
+        retryCount = 0; // Reset retry count on successful send
 
         // Show success message and update button
         showVerificationMessage('✓ Verification email sent! Please check your inbox and spam folder.', false);
@@ -279,13 +282,23 @@ async function resendVerificationEmail() {
     } catch (error) {
         console.error('Error sending verification email:', error);
         let errorMessage = 'Failed to send verification email. ';
+        
         if (error.code === 'auth/too-many-requests') {
-            errorMessage += 'Too many requests. Please try again in a few minutes.';
+            retryCount++;
+            if (retryCount >= MAX_RETRIES) {
+                errorMessage += 'Maximum retry attempts reached. Please try again in 30 minutes.';
+                retryCount = 0;
+            } else {
+                const waitTime = Math.min(30, Math.pow(2, retryCount)) * 60000; // Exponential backoff up to 30 minutes
+                errorMessage += `Please try again in ${Math.ceil(waitTime / 60000)} minutes.`;
+                lastVerificationEmailSent = Date.now() - (VERIFICATION_EMAIL_COOLDOWN - waitTime);
+            }
         } else if (error.code === 'auth/invalid-continue-uri') {
             errorMessage += 'Invalid redirect URL. Please contact support.';
         } else {
             errorMessage += 'Please try again later.';
         }
+        
         showVerificationMessage(errorMessage, true);
         
         // Reset button state
