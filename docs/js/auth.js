@@ -72,7 +72,7 @@ async function signupWithEmailPassword(fullName, email, password) {
         console.log('User created, sending verification email'); // Debug log
 
         // Send email verification with complete URL
-        const continueUrl = 'https://advaitlad.github.io/DailyJobs/';
+        const continueUrl = 'https://advaitlad.github.io/DailyJobsDev/';
         const actionCodeSettings = {
             url: continueUrl,
             handleCodeInApp: true
@@ -257,7 +257,7 @@ async function resendVerificationEmail() {
         resendButton.textContent = 'Sending...';
 
         // Construct the full URL including protocol
-        const continueUrl = 'https://advaitlad.github.io/DailyJobs/';
+        const continueUrl = 'https://advaitlad.github.io/DailyJobsDev/';
         const actionCodeSettings = {
             url: continueUrl,
             handleCodeInApp: true
