@@ -69,35 +69,38 @@ async function signupWithEmailPassword(fullName, email, password) {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
 
-        console.log('User created, sending verification email'); // Debug log
+        console.log('User created:', user.uid); // Debug log
 
-        // Send email verification with complete URL
-        const continueUrl = window.location.href;
-        console.log('Continue URL:', continueUrl); // Debug log
-        
-        const actionCodeSettings = {
-            url: continueUrl,
-            handleCodeInApp: false // Set to false to use default email handling
-        };
-
-        // Ensure verification email is sent
-        await user.sendEmailVerification(actionCodeSettings);
-        console.log('Verification email sent successfully'); // Debug log
-        
-        // Update user profile
+        // Update user profile first
         await user.updateProfile({
             displayName: fullName
         });
-        console.log('User profile updated'); // Debug log
+        console.log('Profile updated with name:', fullName); // Debug log
+
+        // Get the current domain
+        const currentDomain = window.location.origin;
+        console.log('Current domain:', currentDomain); // Debug log
+
+        // Send email verification
+        const actionCodeSettings = {
+            url: currentDomain,
+            handleCodeInApp: false
+        };
+        console.log('Verification settings:', actionCodeSettings); // Debug log
+
+        // Ensure verification email is sent
+        await user.sendEmailVerification(actionCodeSettings);
+        console.log('Verification email sent successfully to:', email); // Debug log
         
         // Create user document with verified status explicitly set to false
         await ensureUserDocument(user, fullName, false);
-        console.log('User document created/updated'); // Debug log
+        console.log('User document created/updated for:', user.uid); // Debug log
         
         // Force a reload of the user to ensure we have the latest state
         await user.reload();
+        console.log('User state reloaded, verified:', user.emailVerified); // Debug log
         
-        showMessage('✓ Account created! Please check your email (including spam folder) to verify your account. The verification link will expire in 1 hour.', false);
+        showMessage('✓ Account created! Please check your email (including spam folder) to verify your account.', false);
         
         // Show verification container immediately
         document.getElementById('auth-container').classList.add('hidden');
@@ -105,7 +108,12 @@ async function signupWithEmailPassword(fullName, email, password) {
         document.getElementById('verification-container').classList.remove('hidden');
         
     } catch (error) {
-        console.error('Signup error:', error); // Debug log
+        console.error('Signup error details:', {
+            code: error.code,
+            message: error.message,
+            fullError: error
+        });
+        
         let errorMessage = 'Failed to create account. Please try again.';
         if (error.code === 'auth/email-already-in-use') {
             errorMessage = 'An account already exists with this email. Please sign in.';
@@ -298,14 +306,19 @@ async function resendVerificationEmail() {
     try {
         const user = auth.currentUser;
         if (!user) {
+            console.log('No user signed in'); // Debug log
             showVerificationMessage('No user is currently signed in.', true);
             return;
         }
 
+        console.log('Current user:', user.email); // Debug log
+
         // Force reload user to get latest verification status
         await user.reload();
+        console.log('User reloaded, verified status:', user.emailVerified); // Debug log
         
         if (user.emailVerified) {
+            console.log('User already verified'); // Debug log
             showVerificationMessage('Your email is already verified! Refreshing page...', false);
             setTimeout(() => window.location.reload(), 2000);
             return;
@@ -313,6 +326,7 @@ async function resendVerificationEmail() {
 
         // Check if retry count exceeded
         if (retryCount >= MAX_RETRIES) {
+            console.log('Max retries exceeded. Count:', retryCount); // Debug log
             const timeUntilReset = Math.ceil((RETRY_RESET_TIME - (Date.now() - lastVerificationEmailSent)) / 60000);
             showVerificationMessage(`Maximum retry limit reached. Please wait ${timeUntilReset} minutes before trying again.`, true);
             startTimer(timeUntilReset * 60);
@@ -322,9 +336,11 @@ async function resendVerificationEmail() {
         // Check if enough time has passed since last email
         const now = Date.now();
         const timeElapsed = now - lastVerificationEmailSent;
+        console.log('Time elapsed since last email:', timeElapsed/1000, 'seconds'); // Debug log
         
         if (timeElapsed < VERIFICATION_EMAIL_COOLDOWN) {
             const waitTime = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
+            console.log('Need to wait:', waitTime, 'seconds'); // Debug log
             showVerificationMessage(`Please wait ${Math.ceil(waitTime/60)} minute(s) before requesting another verification email.`, true);
             startTimer(waitTime);
             return;
@@ -332,6 +348,7 @@ async function resendVerificationEmail() {
 
         // Reset retry count if enough time has passed
         if (timeElapsed >= RETRY_RESET_TIME) {
+            console.log('Resetting retry count'); // Debug log
             retryCount = 0;
         }
 
@@ -339,19 +356,22 @@ async function resendVerificationEmail() {
         resendButton.disabled = true;
         resendButton.textContent = 'Sending...';
 
-        // Construct the action code settings using current URL
+        // Get the current domain
+        const currentDomain = window.location.origin;
+        console.log('Current domain for verification:', currentDomain); // Debug log
+
         const actionCodeSettings = {
-            url: window.location.href,
-            handleCodeInApp: false // Set to false to use default email handling
+            url: currentDomain,
+            handleCodeInApp: false
         };
-        
-        console.log('Sending verification email with settings:', actionCodeSettings); // Debug log
+        console.log('Sending verification with settings:', actionCodeSettings); // Debug log
         
         await user.sendEmailVerification(actionCodeSettings);
         console.log('Verification email sent successfully'); // Debug log
         
         lastVerificationEmailSent = now;
         retryCount++;
+        console.log('Updated retry count:', retryCount); // Debug log
 
         // Show success message and update button
         const remainingAttempts = MAX_RETRIES - retryCount;
@@ -362,7 +382,12 @@ async function resendVerificationEmail() {
         startTimer(VERIFICATION_EMAIL_COOLDOWN / 1000);
 
     } catch (error) {
-        console.error('Error sending verification email:', error);
+        console.error('Verification error details:', {
+            code: error.code,
+            message: error.message,
+            fullError: error
+        });
+        
         let errorMessage = 'Failed to send verification email. ';
         
         if (error.code === 'auth/too-many-requests') {
@@ -372,9 +397,12 @@ async function resendVerificationEmail() {
             retryCount++;
         } else if (error.code === 'auth/invalid-continue-uri') {
             errorMessage += 'Invalid redirect URL. Please contact support.';
-            console.error('Invalid continue URL:', window.location.href);
+            console.error('Current domain that was rejected:', window.location.origin);
         } else if (error.code === 'auth/requires-recent-login') {
             errorMessage = 'Please sign out and sign in again to verify your email.';
+        } else if (error.code === 'auth/unauthorized-continue-uri') {
+            errorMessage = 'This domain is not authorized. Please contact support.';
+            console.error('Unauthorized domain:', window.location.origin);
         } else {
             errorMessage += 'Please try again later.';
         }
