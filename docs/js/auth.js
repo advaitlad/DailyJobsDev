@@ -78,7 +78,7 @@ async function signupWithEmailPassword(fullName, email, password) {
         console.log('Profile updated with name:', fullName); // Debug log
 
         // Get the current domain
-        const currentDomain = window.location.origin;
+        const currentDomain = 'https://advaitlad.github.io/DailyJobsDev';
         console.log('Current domain:', currentDomain); // Debug log
 
         // Send email verification
@@ -357,7 +357,7 @@ async function resendVerificationEmail() {
         resendButton.textContent = 'Sending...';
 
         // Get the current domain
-        const currentDomain = window.location.origin;
+        const currentDomain = 'https://advaitlad.github.io/DailyJobsDev';
         console.log('Current domain for verification:', currentDomain); // Debug log
 
         const actionCodeSettings = {
