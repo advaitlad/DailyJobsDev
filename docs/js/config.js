@@ -1,12 +1,12 @@
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCs3SBzlY9Ak2NQUemLenB4ZNDdvQjBKic",
-    authDomain: "dailyjobs-7b52e.firebaseapp.com",
-    projectId: "dailyjobs-7b52e",
-    storageBucket: "dailyjobs-7b52e.firebasestorage.app",
-    messagingSenderId: "162272281123",
-    appId: "1:162272281123:web:e958f79918fa844303e796",
-    measurementId: "G-MMFNK743L2"
+    apiKey: "AIzaSyB32G9TVIScnUv2m8XfwIfWqhX_hrosB9k",
+    authDomain: "dailyjobs-dev.firebaseapp.com",
+    projectId: "dailyjobs-dev",
+    storageBucket: "dailyjobs-dev.firebasestorage.app",
+    messagingSenderId: "1050184927297",
+    appId: "1:1050184927297:web:85eaec0395f5bc6feb5ec0",
+    measurementId: "G-W7BQ0HSNP4"    
 };
 
 // Initialize Firebase
