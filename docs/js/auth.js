@@ -233,27 +233,6 @@ const VERIFICATION_EMAIL_COOLDOWN = 60000; // 1 minute cooldown
 const MAX_RETRIES = 3;
 const RETRY_RESET_TIME = 3600000; // 1 hour to reset retry count
 
-// Helper function to show verification messages
-function showVerificationMessage(message, isError = false) {
-    const messageDiv = document.getElementById('verification-message');
-    if (!messageDiv) return;
-
-    // Create a more prominent message for wait times
-    if (message.includes('wait') || message.includes('minutes')) {
-        messageDiv.innerHTML = `
-            <div class="verification-wait-message">
-                <div class="wait-icon">⏳</div>
-                <div class="wait-text">${message}</div>
-            </div>
-        `;
-    } else {
-        messageDiv.textContent = message;
-    }
-    
-    messageDiv.className = 'verification-message ' + (isError ? 'error' : 'success');
-    messageDiv.style.display = 'block';
-}
-
 // Timer functionality
 let timerInterval;
 
@@ -285,6 +264,12 @@ function startTimer(duration) {
             if (timerContainer) {
                 timerContainer.style.display = 'none';
             }
+            // Clear error message when timer completes
+            const verificationMessage = document.getElementById('verification-message');
+            if (verificationMessage) {
+                verificationMessage.style.display = 'none';
+            }
+            
             const resendButton = document.getElementById('resend-verification');
             if (resendButton) {
                 resendButton.disabled = false;
@@ -296,6 +281,27 @@ function startTimer(duration) {
             }
         }
     }, 1000);
+}
+
+// Helper function to show verification messages
+function showVerificationMessage(message, isError = false) {
+    const messageDiv = document.getElementById('verification-message');
+    if (!messageDiv) return;
+
+    // Create a more prominent message for wait times
+    if (message.includes('wait') || message.includes('minutes')) {
+        messageDiv.innerHTML = `
+            <div class="verification-wait-message">
+                <div class="wait-icon">⏳</div>
+                <div class="wait-text">${message}</div>
+            </div>
+        `;
+    } else {
+        messageDiv.textContent = message;
+    }
+    
+    messageDiv.className = 'verification-message ' + (isError ? 'error' : 'success');
+    messageDiv.style.display = 'block';
 }
 
 // Update resendVerificationEmail function
