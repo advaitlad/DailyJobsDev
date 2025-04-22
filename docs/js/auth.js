@@ -239,7 +239,47 @@ function showVerificationMessage(message, isError = false) {
     messageDiv.style.display = 'block';
 }
 
-// Resend verification email
+// Timer functionality
+let timerInterval;
+
+function startTimer(duration) {
+    const timerDisplay = document.getElementById('timer-countdown');
+    const timerContainer = document.querySelector('.verification-timer');
+    let timer = duration;
+
+    // Show timer container
+    if (timerContainer) {
+        timerContainer.style.display = 'flex';
+    }
+
+    // Clear any existing interval
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    timerInterval = setInterval(() => {
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
+
+        if (timerDisplay) {
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        if (--timer < 0) {
+            clearInterval(timerInterval);
+            if (timerContainer) {
+                timerContainer.style.display = 'none';
+            }
+            const resendButton = document.getElementById('resend-verification');
+            if (resendButton) {
+                resendButton.disabled = false;
+                resendButton.textContent = 'Resend Verification Email';
+            }
+        }
+    }, 1000);
+}
+
+// Update resendVerificationEmail function
 async function resendVerificationEmail() {
     const resendButton = document.getElementById('resend-verification');
     if (!resendButton) return;
@@ -260,8 +300,9 @@ async function resendVerificationEmail() {
         const now = Date.now();
         const timeElapsed = now - lastVerificationEmailSent;
         if (timeElapsed < VERIFICATION_EMAIL_COOLDOWN) {
-            const minutesLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 60000);
-            showVerificationMessage(`Please wait ${minutesLeft} minutes before requesting another verification email.`, true);
+            const secondsLeft = Math.ceil((VERIFICATION_EMAIL_COOLDOWN - timeElapsed) / 1000);
+            showVerificationMessage(`Please wait before requesting another verification email.`, true);
+            startTimer(secondsLeft);
             return;
         }
 
@@ -278,32 +319,23 @@ async function resendVerificationEmail() {
         
         await user.sendEmailVerification(actionCodeSettings);
         lastVerificationEmailSent = now;
-        retryCount = 0; // Reset retry count on successful send
 
         // Show success message and update button
         showVerificationMessage('✓ Verification email sent! Please check your inbox and spam folder.', false);
         resendButton.textContent = 'Email Sent ✓';
 
-        // Reset button after cooldown
-        setTimeout(() => {
-            resendButton.disabled = false;
-            resendButton.textContent = 'Resend Verification Email';
-        }, VERIFICATION_EMAIL_COOLDOWN);
+        // Start the timer
+        startTimer(VERIFICATION_EMAIL_COOLDOWN / 1000);
 
     } catch (error) {
         console.error('Error sending verification email:', error);
         let errorMessage = 'Failed to send verification email. ';
         
         if (error.code === 'auth/too-many-requests') {
+            const waitTime = Math.min(30, Math.pow(2, retryCount)) * 60;
+            errorMessage += `Please try again later.`;
+            startTimer(waitTime);
             retryCount++;
-            if (retryCount >= MAX_RETRIES) {
-                errorMessage += 'Maximum retry attempts reached. Please try again in 30 minutes.';
-                retryCount = 0;
-            } else {
-                const waitTime = Math.min(30, Math.pow(2, retryCount)) * 60000; // Exponential backoff up to 30 minutes
-                errorMessage += `Please try again in ${Math.ceil(waitTime / 60000)} minutes.`;
-                lastVerificationEmailSent = Date.now() - (VERIFICATION_EMAIL_COOLDOWN - waitTime);
-            }
         } else if (error.code === 'auth/invalid-continue-uri') {
             errorMessage += 'Invalid redirect URL. Please contact support.';
         } else {
@@ -323,5 +355,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const resendButton = document.getElementById('resend-verification');
     if (resendButton) {
         resendButton.addEventListener('click', resendVerificationEmail);
+    }
+
+    // Hide timer initially
+    const timerContainer = document.querySelector('.verification-timer');
+    if (timerContainer) {
+        timerContainer.style.display = 'none';
     }
 });

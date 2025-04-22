@@ -752,12 +752,17 @@ input[type="checkbox"]:checked::after {
 
 /* Verification Container Styles */
 .verification-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     background-color: var(--background-color);
     padding: 2rem;
+    z-index: 1000;
 }
 
 .verification-box {
@@ -768,6 +773,40 @@ input[type="checkbox"]:checked::after {
     max-width: 600px;
     text-align: center;
     box-shadow: var(--shadow-lg);
+}
+
+/* Timer styles */
+.verification-timer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    gap: 0.5rem;
+}
+
+.timer-icon {
+    font-size: 1.2rem;
+    animation: pulse 2s infinite;
+}
+
+.timer-text {
+    font-weight: 500;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .verification-icon {
