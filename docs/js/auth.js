@@ -72,43 +72,49 @@ async function signupWithEmailPassword(fullName, email, password) {
         console.log('User created, sending verification email'); // Debug log
 
         // Send email verification with complete URL
-        const continueUrl = 'https://advaitlad.github.io/DailyJobsDev/';
+        const continueUrl = window.location.href;
+        console.log('Continue URL:', continueUrl); // Debug log
+        
         const actionCodeSettings = {
             url: continueUrl,
-            handleCodeInApp: true
+            handleCodeInApp: false // Set to false to use default email handling
         };
 
         // Ensure verification email is sent
         await user.sendEmailVerification(actionCodeSettings);
-        console.log('Verification email sent'); // Debug log
+        console.log('Verification email sent successfully'); // Debug log
         
         // Update user profile
         await user.updateProfile({
             displayName: fullName
         });
+        console.log('User profile updated'); // Debug log
         
         // Create user document with verified status explicitly set to false
         await ensureUserDocument(user, fullName, false);
+        console.log('User document created/updated'); // Debug log
         
         // Force a reload of the user to ensure we have the latest state
         await user.reload();
         
         showMessage('✓ Account created! Please check your email (including spam folder) to verify your account. The verification link will expire in 1 hour.', false);
         
-        // Trigger auth state change to show verification container
-        auth.onAuthStateChanged((user) => {
-            if (user && !user.emailVerified) {
-                document.getElementById('auth-container').classList.add('hidden');
-                document.getElementById('preferences-container').classList.add('hidden');
-                document.getElementById('verification-container').classList.remove('hidden');
-            }
-        });
+        // Show verification container immediately
+        document.getElementById('auth-container').classList.add('hidden');
+        document.getElementById('preferences-container').classList.add('hidden');
+        document.getElementById('verification-container').classList.remove('hidden');
         
     } catch (error) {
         console.error('Signup error:', error); // Debug log
         let errorMessage = 'Failed to create account. Please try again.';
         if (error.code === 'auth/email-already-in-use') {
             errorMessage = 'An account already exists with this email. Please sign in.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'Invalid email address. Please check and try again.';
+        } else if (error.code === 'auth/operation-not-allowed') {
+            errorMessage = 'Email/password accounts are not enabled. Please contact support.';
+        } else if (error.code === 'auth/weak-password') {
+            errorMessage = 'Password is too weak. Please use a stronger password.';
         }
         showMessage(errorMessage, true);
         throw error;
@@ -307,7 +313,6 @@ async function resendVerificationEmail() {
 
         // Check if retry count exceeded
         if (retryCount >= MAX_RETRIES) {
-            const resetTime = new Date(lastVerificationEmailSent + RETRY_RESET_TIME);
             const timeUntilReset = Math.ceil((RETRY_RESET_TIME - (Date.now() - lastVerificationEmailSent)) / 60000);
             showVerificationMessage(`Maximum retry limit reached. Please wait ${timeUntilReset} minutes before trying again.`, true);
             startTimer(timeUntilReset * 60);
@@ -334,13 +339,17 @@ async function resendVerificationEmail() {
         resendButton.disabled = true;
         resendButton.textContent = 'Sending...';
 
-        // Construct the action code settings
+        // Construct the action code settings using current URL
         const actionCodeSettings = {
             url: window.location.href,
-            handleCodeInApp: true
+            handleCodeInApp: false // Set to false to use default email handling
         };
         
+        console.log('Sending verification email with settings:', actionCodeSettings); // Debug log
+        
         await user.sendEmailVerification(actionCodeSettings);
+        console.log('Verification email sent successfully'); // Debug log
+        
         lastVerificationEmailSent = now;
         retryCount++;
 
@@ -363,6 +372,9 @@ async function resendVerificationEmail() {
             retryCount++;
         } else if (error.code === 'auth/invalid-continue-uri') {
             errorMessage += 'Invalid redirect URL. Please contact support.';
+            console.error('Invalid continue URL:', window.location.href);
+        } else if (error.code === 'auth/requires-recent-login') {
+            errorMessage = 'Please sign out and sign in again to verify your email.';
         } else {
             errorMessage += 'Please try again later.';
         }
