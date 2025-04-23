@@ -27,7 +27,11 @@ jobs:
         
     - name: Set up Firebase credentials
       run: |
-        echo "${{ secrets.FIREBASE_CREDENTIALS }}" > config/firebase-adminsdk-fbsvc-9318d491d4.json
+        echo '${{ secrets.FIREBASE_CREDENTIALS }}' | python3 -c "import sys, json; print(json.dumps(json.loads(sys.stdin.read())))" > config/firebase-adminsdk-fbsvc-9318d491d4.json
+        # Debug: Check if file exists and has content (will not show sensitive data)
+        ls -l config/
+        echo "First few characters of credentials file (safe part):"
+        head -c 50 config/firebase-adminsdk-fbsvc-9318d491d4.json
       
     - name: Create .env file
       run: |
