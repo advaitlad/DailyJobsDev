@@ -15,11 +15,16 @@ from dateutil import parser
 # Load environment variables
 load_dotenv()
 
-# Initialize Firebase
-FIREBASE_CREDS_PATH = 'config/firebase-adminsdk-fbsvc-9318d491d4.json'
-cred = credentials.Certificate(FIREBASE_CREDS_PATH)
+# Initialize Firebase with JSON directly
+cred_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
+if cred_json:
+    cred = credentials.Certificate(json.loads(cred_json))
+else:
+    FIREBASE_CREDS_PATH = 'config/firebase-adminsdk-fbsvc-9318d491d4.json'
+    cred = credentials.Certificate(FIREBASE_CREDS_PATH)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
 
 # Load companies from config
 COMPANIES = load_companies()
