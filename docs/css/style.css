@@ -366,6 +366,13 @@ body {
     flex-wrap: wrap;
 }
 
+.job-type-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .job-type-checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -377,11 +384,14 @@ body {
     transition: all 0.2s ease;
     min-width: 180px;
     position: relative;
+    gap: 8px;
 }
 
 .job-type-checkbox-label:hover {
     border-color: var(--primary-color);
     background: #F8F9FA;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .job-type-checkbox-label input[type="checkbox"] {
@@ -400,12 +410,15 @@ body {
     color: #2061b1;
     font-size: 10px;
     font-weight: 500;
-    margin-left: 8px;
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
     border: 1px solid #2061b1;
-    z-index: 1000;
+    margin-left: 4px;
+}
+
+.info-icon:hover {
+    background: #f0f4ff;
 }
 
 /* Tooltip styles */
@@ -413,20 +426,43 @@ body {
     visibility: hidden;
     opacity: 0;
     position: absolute;
-    left: 24px;
-    /* Position relative to info icon */
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgb(255, 255, 255);
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%);
+    background: white;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 12px;
     width: max-content;
     max-width: 300px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 2000;
+    z-index: 1000;
     transition: all 0.2s ease;
-    pointer-events: none;
+}
+
+/* Add a small arrow at the bottom of the tooltip */
+.tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-icon:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Make tooltip accessible via keyboard focus */
+.info-icon:focus .tooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 .tooltip h2 {
@@ -444,19 +480,6 @@ body {
     margin: 4px 0;
     color: var(--text-secondary);
     font-size: 13px;
-}
-
-/* Show tooltip on hover */
-.info-icon:hover .tooltip {
-    visibility: visible;
-    opacity: 1;
-    left: 28px;
-    /* Slight shift on hover */
-}
-
-/* Ensure the tooltip container stays above other elements */
-.job-type-checkbox-label .info-icon .tooltip {
-    z-index: 2000;
 }
 
 /* Companies Layout */
