@@ -175,6 +175,11 @@ async function savePreferences() {
     const user = auth.currentUser;
     if (!user) return;
 
+    const saveBtn = document.getElementById('save-preferences');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+    }
+
     try {
         // Get selected companies
         const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-item'))
@@ -200,10 +205,24 @@ async function savePreferences() {
             locationPreferences: selectedLocations
         });
 
-        showMessage('✓ Preferences saved successfully!', false);
+        // Visual feedback: turn button green and show message
+        if (saveBtn) {
+            saveBtn.classList.add('saved');
+            saveBtn.textContent = '✓ Preferences saved successfully!';
+        }
+        setTimeout(() => {
+            if (saveBtn) {
+                saveBtn.classList.remove('saved');
+                saveBtn.textContent = 'Save Preferences';
+                saveBtn.disabled = false;
+            }
+        }, 2000);
     } catch (error) {
         console.error('Error saving preferences:', error);
         showMessage('Error saving preferences. Please try again.', true);
+        if (saveBtn) {
+            saveBtn.disabled = false;
+        }
     }
 }
 
