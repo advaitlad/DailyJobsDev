@@ -10,6 +10,7 @@ Promise.all([
 .then(([companiesData, locationsData]) => {
     companies = Object.keys(companiesData.companies);
     locations = locationsData.locations;
+    console.log('Loaded locations:', locations); // Debug log
     
     // Initialize the UI with the loaded data
     populateCompanies();
@@ -142,7 +143,7 @@ function populateCompanies(selectedCompanies = [], searchTerm = '') {
 
 // Function to populate location checkboxes
 function populateLocations(selectedLocations = []) {
-    const locationContainer = document.querySelector('.job-types-grid');
+    const locationContainer = document.getElementById('location-types-grid');
     if (!locationContainer) {
         console.error('Location container not found');
         return;
