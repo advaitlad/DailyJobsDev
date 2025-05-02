@@ -151,34 +151,13 @@ function populateLocations(selectedLocations = []) {
     
     locationContainer.innerHTML = ''; // Clear existing checkboxes
     
-    // Add "Any Location" option first
-    const anyLocationLabel = document.createElement('label');
-    anyLocationLabel.className = 'job-type-checkbox-label';
-    anyLocationLabel.innerHTML = `
-        <input type="checkbox" class="location-checkbox" value="any">
-        <span>Any Location</span>
-        <span class="info-icon" tabindex="0">?
-            <div class="tooltip">
-                <h2>Any Location</h2>
-                <p>Show jobs from all locations</p>
-            </div>
-        </span>
-    `;
-    locationContainer.appendChild(anyLocationLabel);
-    
-    // Add other location options
+    // Add only the country/location name, no info icon or tooltip
     Object.entries(locations).forEach(([key, location]) => {
         const label = document.createElement('label');
         label.className = 'job-type-checkbox-label';
         label.innerHTML = `
             <input type="checkbox" class="location-checkbox" value="${key}">
             <span>${location.name}</span>
-            <span class="info-icon" tabindex="0">?
-                <div class="tooltip">
-                    <h2>${location.name}</h2>
-                    <p>${location.description}</p>
-                </div>
-            </span>
         `;
         locationContainer.appendChild(label);
     });
