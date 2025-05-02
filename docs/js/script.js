@@ -1,16 +1,24 @@
 // Load companies from JSON config
 let companies = [];
-fetch('./companies_config.json')
-    .then(response => response.json())
-    .then(data => {
-        companies = Object.keys(data.companies);
-        // Initialize the UI with the loaded companies
-        populateCompanies();
-    })
-    .catch(error => {
-        console.error('Error loading companies:', error);
-        showMessage('Error loading companies list. Please refresh the page.', true);
-    });
+let locations = {};
+
+// Load both companies and locations config
+Promise.all([
+    fetch('./companies_config.json').then(response => response.json()),
+    fetch('./locations_config.json').then(response => response.json())
+])
+.then(([companiesData, locationsData]) => {
+    companies = Object.keys(companiesData.companies);
+    locations = locationsData.locations;
+    
+    // Initialize the UI with the loaded data
+    populateCompanies();
+    populateLocations();
+})
+.catch(error => {
+    console.error('Error loading config files:', error);
+    showMessage('Error loading configuration. Please refresh the page.', true);
+});
 
 // Populate companies grid
 function populateCompanies(selectedCompanies = [], searchTerm = '') {
@@ -132,46 +140,87 @@ function populateCompanies(selectedCompanies = [], searchTerm = '') {
     }
 }
 
+// Function to populate location checkboxes
+function populateLocations(selectedLocations = []) {
+    const locationContainer = document.querySelector('.job-types-grid');
+    if (!locationContainer) {
+        console.error('Location container not found');
+        return;
+    }
+    
+    locationContainer.innerHTML = ''; // Clear existing checkboxes
+    
+    // Add "Any Location" option first
+    const anyLocationLabel = document.createElement('label');
+    anyLocationLabel.className = 'job-type-checkbox-label';
+    anyLocationLabel.innerHTML = `
+        <input type="checkbox" class="location-checkbox" value="any">
+        <span>Any Location</span>
+        <span class="info-icon" tabindex="0">?
+            <div class="tooltip">
+                <h2>Any Location</h2>
+                <p>Show jobs from all locations</p>
+            </div>
+        </span>
+    `;
+    locationContainer.appendChild(anyLocationLabel);
+    
+    // Add other location options
+    Object.entries(locations).forEach(([key, location]) => {
+        const label = document.createElement('label');
+        label.className = 'job-type-checkbox-label';
+        label.innerHTML = `
+            <input type="checkbox" class="location-checkbox" value="${key}">
+            <span>${location.name}</span>
+            <span class="info-icon" tabindex="0">?
+                <div class="tooltip">
+                    <h2>${location.name}</h2>
+                    <p>${location.description}</p>
+                </div>
+            </span>
+        `;
+        locationContainer.appendChild(label);
+    });
+    
+    // Set initial checked states
+    if (selectedLocations) {
+        document.querySelectorAll('.location-checkbox').forEach(checkbox => {
+            checkbox.checked = selectedLocations.includes(checkbox.value);
+        });
+    }
+}
+
 // Save preferences to Firestore
 async function savePreferences() {
     const user = auth.currentUser;
-    if (!user) {
-        showMessage('Please sign in to save preferences', true);
-        return;
-    }
+    if (!user) return;
 
     try {
         // Get selected companies
-        const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-checkbox'))
-            .filter(checkbox => checkbox.checked)
-            .map(checkbox => checkbox.value);
+        const selectedCompanies = Array.from(document.querySelectorAll('#selected-companies .company-item'))
+            .map(item => item.dataset.company.toLowerCase());
 
         // Get selected job types
-        const selectedJobTypes = Array.from(document.querySelectorAll('.job-type-checkbox'))
-            .filter(checkbox => checkbox.checked)
+        const selectedJobTypes = Array.from(document.querySelectorAll('.job-type-checkbox:checked'))
             .map(checkbox => checkbox.value);
 
         // Get selected experience levels
-        const selectedExperienceLevels = Array.from(document.querySelectorAll('.experience-level-checkbox'))
-            .filter(checkbox => checkbox.checked)
+        const selectedExperienceLevels = Array.from(document.querySelectorAll('.experience-level-checkbox:checked'))
             .map(checkbox => checkbox.value);
 
-        // Save to Firestore
+        // Get selected locations
+        const selectedLocations = Array.from(document.querySelectorAll('.location-checkbox:checked'))
+            .map(checkbox => checkbox.value);
+
+        // Update user document
         await db.collection('users').doc(user.uid).update({
             preferences: selectedCompanies,
             jobTypes: selectedJobTypes,
             experienceLevels: selectedExperienceLevels,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            locationPreferences: selectedLocations
         });
 
-        const saveBtn = document.getElementById('save-preferences');
-        saveBtn.classList.add('saved');
-        saveBtn.textContent = 'Preferences Saved!';
-        setTimeout(() => {
-            saveBtn.classList.remove('saved');
-            saveBtn.textContent = 'Save Preferences';
-        }, 2000);
-
+        showMessage('✓ Preferences saved successfully!', false);
     } catch (error) {
         console.error('Error saving preferences:', error);
         showMessage('Error saving preferences. Please try again.', true);
@@ -207,6 +256,13 @@ async function loadPreferences() {
                 document.querySelectorAll('.experience-level-checkbox').forEach(checkbox => {
                     checkbox.checked = data.experienceLevels.includes(checkbox.value);
                 });
+            }
+
+            // Load location preferences
+            if (data.locationPreferences) {
+                populateLocations(data.locationPreferences);
+            } else {
+                populateLocations([]);
             }
         }
     } catch (error) {
@@ -472,4 +528,26 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('sidebarCollapsed', userInfo.classList.contains('collapsed'));
         });
     }
+
+    // Handle "Any Location" checkbox
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('location-checkbox')) {
+            const anyLocationCheckbox = document.querySelector('.location-checkbox[value="any"]');
+            const otherLocationCheckboxes = document.querySelectorAll('.location-checkbox:not([value="any"])');
+            
+            if (e.target === anyLocationCheckbox) {
+                // If "Any Location" is checked, uncheck all others
+                if (e.target.checked) {
+                    otherLocationCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                }
+            } else {
+                // If any other location is checked, uncheck "Any Location"
+                if (e.target.checked) {
+                    anyLocationCheckbox.checked = false;
+                }
+            }
+        }
+    });
 }); 
