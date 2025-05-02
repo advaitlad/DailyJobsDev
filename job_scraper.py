@@ -41,9 +41,7 @@ def scrape_jobs():
         # Only include verified users with non-empty preferences and email
         preferences = user_data.get('preferences', [])
         job_types = user_data.get('jobTypes', [])  # Default to empty array if not specified
-        if (user_data.get('emailVerified', False) and 
-            preferences and  # This checks if preferences is non-empty
-            user_data.get('email')):
+        if (user_data.get('emailVerified', False) and preferences and user_data.get('email')):
             user_preferences[user_data['email']] = {
                 'companies': preferences,
                 'jobTypes': job_types,
