@@ -25,7 +25,6 @@ else:
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-
 # Load companies from config
 COMPANIES = load_companies()
 GREENHOUSE_COMPANIES = list(COMPANIES.keys())
@@ -109,7 +108,7 @@ def create_html_table(jobs):
     html = """
     <html>
     <head>
-    <div><h1>Job Openings Updated in the Last 24 Hours</h1></div>
+    <div><h1>Job Openings Updated in the Last 6 Hours</h1></div>
     <style>
         table {
             border-collapse: collapse;
@@ -213,10 +212,10 @@ def send_email_notification(jobs, recipient_email):
     msg['To'] = recipient_email
     
     if jobs:
-        msg['Subject'] = f"New Job Openings Found ({len(jobs)} positions)"
+        msg['Subject'] = f"PingMeJobs Found {len(jobs)} positions"
         
         # Create both plain text and HTML versions
-        text_content = "New Job positions found:\n\n"
+        text_content = "New Job positions found in the last 6 hours:\n\n"
         for job in jobs:
             text_content += f"Company: {job['company']}\n"
             text_content += f"Position: {job['title']}\n"
@@ -232,7 +231,7 @@ def send_email_notification(jobs, recipient_email):
         msg.attach(MIMEText(html_content, 'html'))
     else:
         msg['Subject'] = "Jobs Update - No New Positions"
-        body = "No new positions were updated in the last 24 hours.\n\n"
+        body = "No new positions were updated in the last 6 hours.\n\n"
         body += "Keep checking back for new opportunities!"
         msg.attach(MIMEText(body, 'plain'))
     

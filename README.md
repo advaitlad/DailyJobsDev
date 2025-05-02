@@ -36,7 +36,7 @@ python job_scraper.py
 
 ## Features
 - Scrapes job postings from major tech companies
-- Checks for new positions every 12 hours
+- Checks for new positions every 6 hours
 - Sends email notifications for new job openings
 - Stores job data in Firebase for tracking
 
