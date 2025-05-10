@@ -271,7 +271,7 @@ def get_experience_level(title):
     senior_keywords = {
         'senior', 'lead', 'principal', 'staff', 'sr.', 'head', 'chief',
         'director', 'vp', 'vice president', 'senior manager', 'lead manager',
-        'principal manager', 'staff manager', 'head manager', 'group'
+        'principal manager', 'staff manager', 'head manager', 'group', 'engineering manager',
     }
     
     junior_keywords = {

@@ -2,17 +2,19 @@
 let companies = [];
 let locations = {};
 
-// Load both companies and locations config
+// Load all companies and locations config
 Promise.all([
     fetch('./greenhouse_companies_config.json').then(response => response.json()),
     fetch('./ashby_companies_config.json').then(response => response.json()),
+    fetch('./lever_companies_config.json').then(response => response.json()),
     fetch('./locations_config.json').then(response => response.json())
 ])
-.then(([greenhouseData, ashbyData, locationsData]) => {
-    // Combine companies from both configs
+.then(([greenhouseData, ashbyData, leverData, locationsData]) => {
+    // Combine companies from all configs
     companies = [
         ...Object.keys(greenhouseData.companies),
-        ...Object.keys(ashbyData.companies)
+        ...Object.keys(ashbyData.companies),
+        ...Object.keys(leverData.companies)
     ];
     // Remove duplicates and sort
     companies = [...new Set(companies)].sort();
@@ -48,6 +50,9 @@ function populateCompanies(selectedCompanies = [], searchTerm = '') {
     const availableLabels = [];
     const selectedLabels = [];
     
+    // Lowercase version of selectedCompanies for case-insensitive matching
+    const selectedCompaniesLower = selectedCompanies.map(c => c.toLowerCase());
+    
     companies.forEach(company => {
         const label = document.createElement('label');
         label.className = 'company-checkbox-label';
@@ -63,8 +68,8 @@ function populateCompanies(selectedCompanies = [], searchTerm = '') {
         label.appendChild(checkbox);
         label.appendChild(span);
         
-        // Add to appropriate container or array
-        if (selectedCompanies.includes(company)) {
+        // Add to appropriate container or array (case-insensitive match)
+        if (selectedCompaniesLower.includes(company.toLowerCase())) {
             // Always show selected companies regardless of search term
             checkbox.checked = true;
             selectedLabels.push({

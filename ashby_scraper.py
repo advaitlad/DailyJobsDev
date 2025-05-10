@@ -176,9 +176,9 @@ def get_experience_level(title: str) -> str:
     
     # Define experience level keywords with their variations
     senior_keywords = {
-        'senior', 'lead', 'principal', 'staff', 'sr.', 'head', 'chief',
+         'senior', 'lead', 'principal', 'staff', 'sr.', 'head', 'chief',
         'director', 'vp', 'vice president', 'senior manager', 'lead manager',
-        'principal manager', 'staff manager', 'head manager', 'group'
+        'principal manager', 'staff manager', 'head manager', 'group', 'engineering manager',
     }
     
     junior_keywords = {
@@ -217,8 +217,8 @@ def scrape_ashby_jobs(company_name: str, board_token: str, experience_levels: Op
     """
     url = f"https://api.ashbyhq.com/posting-api/job-board/{board_token}?includeCompensation=true"
     current_time = datetime.now(timezone.utc)
-    last_6h = current_time - timedelta(hours=6)  # Calculate timestamp from 6 hours ago
-
+    # last_6h = current_time - timedelta(hours=6)  # Calculate timestamp from 6 hours ago
+    last_72h = current_time - timedelta(hours=72)
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -248,7 +248,7 @@ def scrape_ashby_jobs(company_name: str, board_token: str, experience_levels: Op
             
             # Parse and check published time
             published_date = parser.parse(job.get('publishedAt', ''))
-            if not published_date or published_date <= last_6h:  # Skip jobs older than 6 hours
+            if not published_date or published_date <= last_72h:  # Skip jobs older than 6 hours
                 continue
             
             department = job.get('department', '')
@@ -334,7 +334,10 @@ def scrape_all_ashby_jobs(experience_levels: Optional[List[str]] = None) -> List
             all_jobs.extend(jobs)
             #print(f"Found {len(jobs)} jobs")
         else:
-            print("No jobs found or there was an error fetching jobs.")
+            if jobs is None:
+                print(f"Error occurred while fetching jobs for {company_name}")
+            else:
+                print(f"No jobs found for {company_name}")
         
         # Add delay between requests to avoid rate limiting
         time.sleep(1.0)

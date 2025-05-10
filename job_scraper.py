@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 from greenhouse_scraper import scrape_greenhouse_jobs, load_companies as load_greenhouse_companies
 from ashby_scraper import scrape_all_ashby_jobs, load_ashby_companies
+from lever_scraper import scrape_lever_jobs, load_lever_companies
 from dateutil import parser
 
 # Load environment variables
@@ -24,9 +25,10 @@ else:
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Load companies from both configs
+# Load companies from all configs
 GREENHOUSE_COMPANIES = load_greenhouse_companies()
 ASHBY_COMPANIES = load_ashby_companies()
+LEVER_COMPANIES = load_lever_companies()
 
 def scrape_jobs():
     new_jobs = []
@@ -100,6 +102,25 @@ def scrape_jobs():
             db.collection('jobs').add(job_doc)
             all_new_jobs.append(job)
             print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']}) {job['experience_level']}- Posted {job['hours_ago']} hours ago")
+    
+    # Scrape Lever jobs
+    print("\nScraping Lever jobs...")
+    for company_name, lever_subdomain in LEVER_COMPANIES.items():
+        print(f"Scraping jobs from {company_name}...")
+        lever_jobs = scrape_lever_jobs(company_name, lever_subdomain)
+        total_jobs_found += len(lever_jobs)
+        for job in lever_jobs:
+            job_doc = {
+                **job,
+                'last_updated': job['updated_at'],
+                'added_to_db': firestore.SERVER_TIMESTAMP
+            }
+            job_doc.pop('updated_at', None)
+            job_ref = db.collection('jobs').where('job_id', '==', job['job_id']).get()
+            if not job_ref:
+                db.collection('jobs').add(job_doc)
+                all_new_jobs.append(job)
+                print(f"Added new job: {job['title']} at {job['company']} (ID: {job['job_id']}) {job['experience_level']}- Last Updated {job['hours_ago']} hours ago")
     
     # Send personalized emails to each verified user based on their preferences
     verified_users = len(user_preferences)
